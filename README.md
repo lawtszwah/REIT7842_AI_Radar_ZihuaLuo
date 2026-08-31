@@ -1,0 +1,103 @@
+# prdbench — Benchmarking ML detectors against CFAR baselines in passive radar
+
+REIT7842 thesis project · Zihua Luo (49528923) · Master of Computer Science
+Primary supervisor: Dr Lu Zhang · Co-supervisor: Fan Zhang
+
+## What this is
+
+Published machine-learning results for radar target detection are hard to compare:
+different datasets, different metrics, under-specified CFAR baselines, and inference
+cost almost never reported. This repository is the apparatus that removes those
+differences — one simulator, one data-generation config, one hyperparameter budget,
+one evaluation protocol — so that any difference left over is attributable to the
+detector rather than to the evaluation setup.
+
+Three questions, and where each is answered in the code:
+
+| Research question | Answered by |
+|---|---|
+| RQ1 — Pd at a fixed Pfa, tuned CFAR vs ML families | `evaluation/protocol.py`, `evaluation/metrics.py::pd_at_pfa` |
+| RQ2 — where gains occur (SNR, range/Doppler, clutter) | `evaluation/metrics.py::pd_by_snr`, `configs/data/shift_test.yaml` |
+| RQ3 — accuracy retained under an inference-cost budget | `evaluation/cost.py`, `scripts/make_figures.py` fig. 3 |
+
+## The one design decision everything rests on
+
+**Every detector returns a continuous per-cell score; the evaluation harness owns the
+threshold.** A CFAR detector returns the ratio of the cell under test to its local
+noise estimate; a classifier returns a logit. Sweeping a threshold over the background
+score distribution then produces a genuine ROC for each, and "Pd at a fixed Pfa"
+becomes a like-for-like comparison instead of a comparison of default operating points.
+See `docs/decisions/ADR-0001-per-cell-score-interface.md`.
+
+## Quick start
+
+```bash
+pip install -e ".[dev]"
+pytest                                                    # contract + protocol tests
+prdbench run --config configs/protocol/smoke.yaml --out results/smoke
+python scripts/make_figures.py --results results/smoke/results.json --out results/smoke/figures
+```
+
+`smoke.yaml` runs in ~2 minutes on a laptop CPU using the **stand-in simulator**. It
+exists to prove the pipeline, not to produce findings — see the warning below.
+
+## Repository layout
+
+```
+src/prdbench/
+  simulation/   interface.py   contract the simulator must satisfy (SimConfig -> SimBatch)
+                stub.py        stand-in generator, used until the group's function arrives
+                adapter.py     one-file drop-in point for the group's function
+  data/         generate.py    (config, seed) -> maps + per-cell labels + ground truth
+  detectors/    base.py        Detector ABC: fit / score / n_parameters
+                cfar.py        CA-, OS-, GO-CFAR, tuned under the same budget as the ML models
+                features.py    multi-scale local statistics + gradient-boosted trees
+                cnn.py         small dilated fully-convolutional per-cell detector
+                attention.py   third model family — interface fixed, implementation is M3
+  evaluation/   metrics.py     Pd per target, Pfa per cell, ROC, SNR stratification
+                cost.py        parameter count and per-map inference latency
+                protocol.py    the single code path all detectors go through
+  tuning/       search.py      equal-budget hyperparameter search, CFAR included
+configs/        data / detectors / protocol — every run is a config plus a seed
+experiments/    one directory per run: config snapshot, results.json, figures, notes
+docs/           design diagram, ADRs, risk register, data-management and repro plans
+```
+
+## ⚠ Simulator status
+
+The parameterised range-Doppler simulation function is supplied by the research group
+and **has not been received yet** (risk RSK-01). Until it is:
+
+* `simulation/stub.py` generates stand-in maps — complex Gaussian noise, a zero-Doppler
+  direct-path ridge, clutter patches, and sinc-response targets at specified SNR.
+* Every run tags its output `simulator: "stub"`, and no stub result is reportable.
+* `tests/test_simulator_contract.py` is the acceptance test the group's function must
+  pass, so the handover is a defined task rather than an open-ended integration.
+
+## Plan of work
+
+| Milestone | Content | Status |
+|---|---|---|
+| M1 | Protocol, metrics, CFAR baselines, stub simulator, CI | ✅ done — this repo |
+| M2 | Group simulator integrated via `adapter.py`; protocol frozen | in progress |
+| M3 | Feature classifier and CNN tuned at equal budget; attention arm added | scheduled |
+| M4 | Shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | scheduled |
+| M5 | Final runs at 5 seeds, figures, thesis write-up | scheduled |
+
+The protocol is frozen at the end of M2, **before** the most flexible models are tuned.
+Freezing late is the failure mode this project criticises in the literature; freezing
+early is the control against it.
+
+## Reproducibility
+
+Datasets are never committed — they are regenerated from `(config, seed)`, so a result
+is reproducible from a config file and a commit hash alone. Every `results.json`
+records the git commit, Python and NumPy versions, platform, simulator name and version,
+and the full spec. See `docs/reproducibility.md`.
+
+## Ethics, data governance, safety
+
+No human participants, no personal data, no physical transmission: all data is
+synthetic and all work is computational, so no HREC application is required. The
+relevant governance obligations are about the *simulator*, not about subjects — see
+`docs/data_management_plan.md`.

@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+
+# Datasets are regenerated from (config, seed); never committed.
+data/
+*.npz
+*.npy
+*.h5
+
+# Run outputs: results.json and figures are committed per experiment,
+# raw checkpoints are not.
+results/**/checkpoints/
+*.pt
+*.ckpt

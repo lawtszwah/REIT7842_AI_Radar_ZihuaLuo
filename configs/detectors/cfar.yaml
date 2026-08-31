@@ -1,0 +1,5 @@
+# CFAR baselines. Defaults here are placeholders only -- the values actually used
+# in reported runs come from `prdbench tune`, at the same trial budget as the ML arms.
+ca_cfar: {kind: ca_cfar, params: {train: 4, guard: 2}}
+os_cfar: {kind: os_cfar, params: {train: 6, guard: 2, rank_pct: 75}}
+go_cfar: {kind: go_cfar, params: {train: 6, guard: 2}}

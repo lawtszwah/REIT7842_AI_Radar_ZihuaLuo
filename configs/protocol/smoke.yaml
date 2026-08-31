@@ -1,0 +1,33 @@
+# Fast end-to-end run used in CI and for the design artefact screenshot.
+# Small maps, few seeds -- proves the pipeline, not the science.
+simulator: stub
+
+train:
+  n_maps: 400
+  n_range: 64
+  n_doppler: 64
+  snr_db: [2.0, 18.0]
+  clutter_patches: [0, 3]
+
+test:
+  n_maps: 200
+  n_range: 64
+  n_doppler: 64
+  snr_db: [0.0, 18.0]
+  clutter_patches: [0, 3]
+
+protocol:
+  pfa_points: [1.0e-4, 1.0e-3, 1.0e-2]
+  tol_bins: 1.0
+  exclude_bins: 3.0
+  zero_doppler_guard: 2
+  snr_edges: [0, 4, 8, 12, 18]
+  n_seeds: 2
+  latency_repeats: 3
+
+detectors:
+  - {key: ca_cfar,   kind: ca_cfar,   params: {train: 4, guard: 2}}
+  - {key: os_cfar,   kind: os_cfar,   params: {train: 4, guard: 2, rank_pct: 75}}
+  - {key: go_cfar,   kind: go_cfar,   params: {train: 6, guard: 2}}
+  - {key: feat_gbdt, kind: feat_gbdt, params: {max_iter: 80, max_depth: 6, neg_per_map: 300}}
+  - {key: cnn,       kind: cnn,       params: {width: 16, depth: 4, epochs: 15}}

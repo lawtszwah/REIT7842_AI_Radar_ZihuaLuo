@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11"}
+      - run: pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check src tests
+      - name: Contract and protocol tests
+        run: pytest -q
+      - name: Smoke benchmark must run end to end
+        run: |
+          prdbench run --config configs/protocol/smoke.yaml --out results/ci
+          python scripts/make_figures.py --results results/ci/results.json --out results/ci/figures
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-results
+          path: results/ci
