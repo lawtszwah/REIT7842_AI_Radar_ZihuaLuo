@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 900" width="1520" height="900">
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker></defs>
+<rect x="0" y="0" width="1520" height="900" rx="0" fill="#ffffff" stroke="#ffffff" stroke-width="1.2"/>
+<text x="40" y="38" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="21" fill="#0f172a" font-weight="700" text-anchor="start">Data handling and provenance workflow</text>
+<text x="40" y="60" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="normal" text-anchor="start">Artefact 2 of 3 — what exists, where it is allowed to live, and what makes a result reproducible. Zihua Luo (49528923) · REIT7842 · supervisor Dr Lu Zhang · Benchmarking ML detectors against CFAR baselines in passive radar</text>
+<rect x="200" y="150" width="1280" height="132" rx="9" fill="#f0f9ff" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="40" y="176" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#1d4ed8" font-weight="700" text-anchor="start">Version-controlled</text>
+<text x="40" y="194" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">permanent, public repository</text>
+<rect x="200" y="306" width="1280" height="150" rx="9" fill="#fafafa" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="40" y="332" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#475569" font-weight="700" text-anchor="start">Transient</text>
+<text x="40" y="350" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">held in memory only,</text>
+<text x="40" y="364" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">never written to disk</text>
+<rect x="200" y="480" width="1280" height="150" rx="9" fill="#fffbeb" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="40" y="506" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#d97706" font-weight="700" text-anchor="start">Restricted or local</text>
+<text x="40" y="524" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">never in the public</text>
+<text x="40" y="538" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">repository</text>
+<rect x="220" y="166" width="268" height="100" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="220" y="166" width="4.5" height="100" rx="2" fill="#1d4ed8"/>
+<text x="234" y="185" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Run specification</text>
+<text x="234" y="202" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">configs/data/*.yaml` — swept parameters</text>
+<text x="234" y="216.5" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">configs/protocol/*.yaml` — metric, guards, seeds</text>
+<text x="234" y="231.0" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">seed` (integer) · git commit</text>
+<text x="234" y="245.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Kilobytes. Committed, reviewed, permanent.</text>
+<rect x="1180" y="166" width="300" height="100" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1180" y="166" width="4.5" height="100" rx="2" fill="#1d4ed8"/>
+<text x="1194" y="185" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Recorded outputs</text>
+<text x="1194" y="202" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">results.json` — spec snapshot, git commit,</text>
+<text x="1194" y="216.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">library versions, platform, simulator name</text>
+<text x="1194" y="231.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">and version, per-seed results</text>
+<text x="1194" y="245.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Figures · experiment notes · ADRs. Permanent.</text>
+<rect x="520" y="322" width="220" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="520" y="322" width="4.5" height="118" rx="2" fill="#475569"/>
+<text x="534" y="341" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Generate</text>
+<text x="534" y="358" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Deterministic from</text>
+<text x="534" y="372.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">(config, seed).</text>
+<text x="534" y="387.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Tens of GB at full</text>
+<text x="534" y="401.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">scale — regenerated</text>
+<text x="534" y="416.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">on demand, never</text>
+<text x="534" y="430.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">stored.</text>
+<rect x="770" y="322" width="220" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="770" y="322" width="4.5" height="118" rx="2" fill="#475569"/>
+<text x="784" y="341" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Split</text>
+<text x="784" y="358" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Train `seed</text>
+<text x="784" y="372.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Validation `5000+seed</text>
+<text x="784" y="387.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Test `1000+seed</text>
+<text x="784" y="401.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Shift test: SNR, noise</text>
+<text x="784" y="416.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">and clutter regimes</text>
+<text x="784" y="430.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">outside the training grid</text>
+<rect x="1020" y="322" width="130" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1020" y="322" width="4.5" height="118" rx="2" fill="#475569"/>
+<text x="1034" y="341" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Detect</text>
+<text x="1034" y="358" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Score maps,</text>
+<text x="1034" y="372.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">also transient</text>
+<rect x="220" y="498" width="268" height="116" rx="7" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+<rect x="220" y="498" width="4.5" height="116" rx="2" fill="#d97706"/>
+<text x="234" y="517" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Group's simulation function</text>
+<text x="234" y="534" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Supplied by the research group.</text>
+<text x="234" y="548.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Its licence and any embargo govern</text>
+<text x="234" y="563.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">what may be shared, so it is reached</text>
+<text x="234" y="577.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">only through `adapter.py` and is never</text>
+<text x="234" y="592.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">committed or pushed. ⚠ RSK-01, not yet received</text>
+<rect x="1020" y="498" width="260" height="116" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1020" y="498" width="4.5" height="116" rx="2" fill="#d97706"/>
+<text x="1034" y="517" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Model checkpoints</text>
+<text x="1034" y="534" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Hundreds of MB. Local disk and</text>
+<text x="1034" y="548.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">UQ RDM, listed in `.gitignore`.</text>
+<text x="1034" y="563.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Retained to end of project + 5 years.</text>
+<text x="1034" y="577.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">Not needed to reproduce a result —</text>
+<text x="1034" y="592.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.2" fill="#475569" font-weight="normal" text-anchor="start">the triple (config, seed, commit) is.</text>
+<path d="M 354 266 H 354 V 372" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 354 372 L 516 372" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<text x="435.0" y="365.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">config + seed</text>
+<path d="M 354 498 H 354 V 400" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 354 400 L 516 400" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<text x="400" y="462" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">generator, via adapter.py</text>
+<path d="M 744 381 L 766 381" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 994 381 L 1016 381" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 1150 381 H 1330 V 272" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<text x="1240" y="373" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">metrics + cost</text>
+<path d="M 1085 440 H 1085 V 494" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<text x="1150" y="470" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">trained weights</text>
+<rect x="40" y="646" width="700" height="214" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="56" y="670" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" fill="#0f172a" font-weight="700" text-anchor="start">Why nothing needs a data repository</text>
+<text x="56" y="692" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">A dataset here is a deterministic function of (config, seed). Storing the</text>
+<text x="56" y="708" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">configuration therefore *is* storing the data: the same three files and one</text>
+<text x="56" y="724" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">integer regenerate it byte for byte, on any machine, years later.</text>
+<text x="56" y="740" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start"></text>
+<text x="56" y="756" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">That single choice removes the largest data-management burden of the project —</text>
+<text x="56" y="772" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">tens of gigabytes that would otherwise need storage, backup, versioning and a</text>
+<text x="56" y="788" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">retention plan — and replaces it with a few kilobytes under version control.</text>
+<text x="56" y="804" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start"></text>
+<text x="56" y="820" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">It also makes tampering visible: a figure cites a commit, and the commit</text>
+<text x="56" y="836" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">regenerates the data. A result that cannot be reproduced this way is not a result.</text>
+<rect x="768" y="646" width="712" height="214" rx="7" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.2"/>
+<text x="784" y="670" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" fill="#0f172a" font-weight="700" text-anchor="start">Governance rules this workflow enforces</text>
+<text x="784" y="692" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">1.  The group's simulator is never committed or pushed. The repository is public;</text>
+<text x="784" y="708" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">     .gitignore covers its expected location and this is checked at every merge.</text>
+<text x="784" y="724" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">2.  No result produced by the stand-in generator is reportable. Every results.json</text>
+<text x="784" y="740" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">     records which simulator produced it, and stub runs carry a warning string.</text>
+<text x="784" y="756" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">3.  Datasets are never committed — only configs, seeds, results and figures.</text>
+<text x="784" y="772" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">4.  Every reported number carries its commit, library versions and platform.</text>
+<text x="784" y="788" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">5.  Per-seed results are retained, not only the aggregate, so variance is inspectable.</text>
+<text x="784" y="804" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">6.  All data is synthetic: no human participants, no personal data, no transmission,</text>
+<text x="784" y="820" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">     therefore no HREC application and no safety risk assessment (confirmed with</text>
+<text x="784" y="836" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">     the supervisor and minuted).</text>
+</svg>

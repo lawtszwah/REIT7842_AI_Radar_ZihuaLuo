@@ -1,199 +1,165 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1520 900" width="1520" height="900">
 <defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker></defs>
 <rect x="0" y="0" width="1520" height="900" rx="0" fill="#ffffff" stroke="#ffffff" stroke-width="1.2"/>
-<text x="40" y="38" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="21" fill="#0f172a" font-weight="700" text-anchor="start">Benchmarking machine learning detectors against CFAR baselines in passive radar</text>
-<text x="40" y="60" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="normal" text-anchor="start">Design artefact — apparatus and evaluation workflow  ·  Zihua Luo (49528923)  ·  REIT7842  ·  supervisor Dr Lu Zhang</text>
+<text x="40" y="38" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="21" fill="#0f172a" font-weight="700" text-anchor="start">Signal-processing and evaluation pipeline</text>
+<text x="40" y="60" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="normal" text-anchor="start">Artefact 1 of 3 — how one range-Doppler map becomes one number in the results table. Zihua Luo (49528923) · REIT7842 · supervisor Dr Lu Zhang · Benchmarking ML detectors against CFAR baselines in passive radar</text>
 <rect x="40" y="72" width="356" height="22" rx="11" fill="#ffffff" stroke="#0f766e" stroke-width="1.2"/>
 <text x="52" y="87" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.8" fill="#0f766e" font-weight="600" text-anchor="start">RQ1  Pd at fixed Pfa: tuned CFAR vs ML families</text>
 <rect x="412" y="72" width="356" height="22" rx="11" fill="#ffffff" stroke="#6d28d9" stroke-width="1.2"/>
 <text x="424" y="87" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.8" fill="#6d28d9" font-weight="600" text-anchor="start">RQ2  where the gains occur</text>
 <rect x="784" y="72" width="356" height="22" rx="11" fill="#ffffff" stroke="#b45309" stroke-width="1.2"/>
 <text x="796" y="87" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.8" fill="#b45309" font-weight="600" text-anchor="start">RQ3  accuracy retained under a cost budget</text>
-<text x="40" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#1d4ed8" font-weight="700" text-anchor="start">1 · Data generation</text>
-<path d="M 40 129 L 340 129" stroke="#1d4ed8" stroke-width="2"/>
-<text x="376" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#6d28d9" font-weight="700" text-anchor="start">2 · Detectors under test</text>
-<path d="M 376 129 L 676 129" stroke="#6d28d9" stroke-width="2"/>
-<text x="712" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#0f766e" font-weight="700" text-anchor="start">3 · Shared evaluation protocol</text>
-<path d="M 712 129 L 1032 129" stroke="#0f766e" stroke-width="2"/>
-<text x="1068" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#b45309" font-weight="700" text-anchor="start">4 · Outputs, provenance, governance</text>
-<path d="M 1068 129 L 1480 129" stroke="#b45309" stroke-width="2"/>
-<rect x="40" y="145" width="300" height="104" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="40" y="145" width="4.5" height="104" rx="2" fill="#1d4ed8"/>
-<text x="54" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">SimConfig — swept parameters</text>
-<text x="54" y="181" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">target range bin`, `Doppler bin</text>
-<text x="54" y="195.5" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">SNR (dB)`, `noise power</text>
-<text x="54" y="210.0" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">clutter patches`, `n targets`, `seed</text>
-<text x="54" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Grid and ranges fixed per config file</text>
-<rect x="40" y="265" width="300" height="132" rx="7" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
-<rect x="40" y="265" width="4.5" height="132" rx="2" fill="#1d4ed8"/>
-<text x="54" y="284" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Simulator, behind an interface</text>
-<text x="54" y="301" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">GroupSimulator — research group's</text>
-<text x="54" y="315.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">parameterised RD-map function</text>
-<text x="54" y="330.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">⚠ NOT YET RECEIVED  (RSK-01)</text>
-<text x="54" y="344.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start"></text>
-<text x="54" y="359.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">StubSimulator — stand-in, lets the</text>
-<text x="54" y="373.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">pipeline run today; not reportable</text>
-<rect x="262.0" y="274" width="68.0" height="17" rx="8" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="1.2"/>
-<text x="296.0" y="286" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">ADR-0002</text>
-<rect x="40" y="413" width="300" height="88" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="40" y="413" width="4.5" height="88" rx="2" fill="#1d4ed8"/>
-<text x="54" y="432" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Dataset</text>
-<text x="54" y="449" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">(N, R, D) linear-power maps</text>
-<text x="54" y="463.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">per-cell target mask</text>
-<text x="54" y="478.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">exact ground truth (range, Doppler, SNR)</text>
-<rect x="40" y="517" width="300" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="40" y="517" width="4.5" height="118" rx="2" fill="#1d4ed8"/>
-<text x="54" y="536" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Splits — disjoint seeds</text>
-<text x="54" y="553" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Train  `seed`      ·  Val  `5000+seed</text>
-<text x="54" y="567.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Test in-distribution  `1000+seed</text>
-<text x="54" y="582.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Test shifted regimes: SNR, noise and</text>
-<text x="54" y="596.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">clutter outside the training grid</text>
-<text x="54" y="611.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Datasets regenerated, never stored</text>
-<rect x="297.0" y="526" width="33.0" height="17" rx="8" fill="#1d4ed8" stroke="#1d4ed8" stroke-width="1.2"/>
-<text x="313.5" y="538" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">RQ2</text>
-<rect x="376" y="145" width="300" height="86" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="376" y="145" width="4.5" height="86" rx="2" fill="#6d28d9"/>
-<text x="390" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Equal-budget tuning</text>
-<text x="390" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Identical trial count for every arm,</text>
-<text x="390" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">CFAR included — scored on Val at</text>
-<text x="390" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pd @ Pfa = 1e-3. Guards against a</text>
-<text x="390" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">straw-man baseline  (RSK-03)</text>
-<rect x="376" y="247" width="300" height="78" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="376" y="247" width="4.5" height="78" rx="2" fill="#6d28d9"/>
-<text x="390" y="266" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">CFAR family — baselines</text>
-<text x="390" y="283" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">CA-CFAR · OS-CFAR · GO-CFAR</text>
-<text x="390" y="297.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">score = cell / local noise estimate,</text>
-<text x="390" y="312.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">monotone in the threshold multiplier</text>
-<rect x="376" y="341" width="300" height="66" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="376" y="341" width="4.5" height="66" rx="2" fill="#6d28d9"/>
-<text x="390" y="360" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Feature family</text>
-<text x="390" y="377" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Multi-scale local statistics (3 window</text>
-<text x="390" y="391.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">scales, row/column, Doppler geometry)</text>
-<text x="390" y="406.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">→ gradient-boosted trees</text>
-<rect x="376" y="423" width="300" height="74" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="376" y="423" width="4.5" height="74" rx="2" fill="#6d28d9"/>
-<text x="390" y="442" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Deep family</text>
-<text x="390" y="459" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Dilated fully-convolutional net (per-cell</text>
-<text x="390" y="473.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">logit, sized for real-time inference)</text>
-<text x="390" y="488.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Patch-attention arm — milestone M3</text>
-<rect x="376" y="513" width="300" height="122" rx="7" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.2"/>
-<rect x="376" y="513" width="4.5" height="122" rx="2" fill="#6d28d9"/>
-<text x="390" y="532" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">One interface, no thresholds</text>
-<text x="390" y="549" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Detector.score(maps) → (N, R, D)</text>
-<text x="390" y="563.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Every detector returns a continuous</text>
-<text x="390" y="578.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">per-cell statistic. The harness owns the</text>
-<text x="390" y="592.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">threshold, so CFAR and ML are compared</text>
-<text x="390" y="607.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">at the same operating point, not at</text>
-<text x="390" y="621.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">whichever default each ships with.</text>
-<rect x="598.0" y="522" width="68.0" height="17" rx="8" fill="#6d28d9" stroke="#6d28d9" stroke-width="1.2"/>
-<text x="632.0" y="534" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">ADR-0001</text>
-<rect x="712" y="145" width="320" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="712" y="145" width="4.5" height="118" rx="2" fill="#0f766e"/>
-<text x="726" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Score partition</text>
-<text x="726" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Per-target peak within ±1 bin (straddle loss)</text>
-<text x="726" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Background cells only, ±3-bin exclusion</text>
-<text x="726" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">around every true target</text>
-<text x="726" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">±2 Doppler bins guarded at zero Doppler —</text>
-<text x="726" y="239.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">direct-path leakage must not set the threshold</text>
-<rect x="954.0" y="154" width="68.0" height="17" rx="8" fill="#0f766e" stroke="#0f766e" stroke-width="1.2"/>
-<text x="988.0" y="166" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">ADR-0003</text>
-<rect x="712" y="279" width="320" height="66" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="712" y="279" width="4.5" height="66" rx="2" fill="#0f766e"/>
-<text x="726" y="298" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Threshold sweep</text>
-<text x="726" y="315" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Threshold swept over empirical background</text>
-<text x="726" y="329.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">quantiles → exact (Pfa, Pd) curve per arm</text>
-<rect x="712" y="361" width="320" height="152" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="712" y="361" width="4.5" height="152" rx="2" fill="#0f766e"/>
-<text x="726" y="380" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Metrics — radar terms, not accuracy</text>
-<text x="726" y="397" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pd per target at fixed per-cell Pfa  → RQ1</text>
-<text x="726" y="411.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">ROC across Pfa = 1e-5 … 1e-2</text>
-<text x="726" y="426.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pd stratified by SNR, range, Doppler,</text>
-<text x="726" y="440.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">clutter density  → RQ2</text>
-<text x="726" y="455.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Parameter count and ms per map, CPU  → RQ3</text>
-<text x="726" y="469.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">5 seeds → mean ± sd on every number</text>
-<rect x="712" y="529" width="320" height="106" rx="7" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.2"/>
-<rect x="712" y="529" width="4.5" height="106" rx="2" fill="#0f766e"/>
-<text x="726" y="548" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Single code path</text>
-<text x="726" y="565" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">evaluation/protocol.py` runs every arm</text>
-<text x="726" y="579.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">identically; arms differ only in `score()`.</text>
-<text x="726" y="594.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Protocol frozen at M2 — before the deep</text>
-<text x="726" y="608.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">models are tuned. Later changes require an</text>
-<text x="726" y="623.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">ADR and a re-run of every arm  (RSK-04)</text>
-<rect x="1068" y="145" width="412" height="118" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="1068" y="145" width="4.5" height="118" rx="2" fill="#b45309"/>
-<text x="1082" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">results.json — provenance with every number</text>
-<text x="1082" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Full spec snapshot (data, detector, protocol configs)</text>
-<text x="1082" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">git commit · Python / NumPy versions · platform</text>
-<text x="1082" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Simulator name and version — stub runs flagged unusable</text>
-<text x="1082" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Per-seed results retained, not only the aggregate</text>
-<rect x="1068" y="279" width="412" height="92" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="1068" y="279" width="4.5" height="92" rx="2" fill="#b45309"/>
-<text x="1082" y="298" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Figures — one script, one results file</text>
-<text x="1082" y="315" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">ROC per detector family</text>
-<text x="1082" y="329.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pd against target SNR (where detections are won or lost)</text>
-<text x="1082" y="344.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pd against inference latency (the cost-constrained frontier)</text>
-<rect x="1068" y="387" width="412" height="84" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<rect x="1068" y="387" width="4.5" height="84" rx="2" fill="#b45309"/>
-<text x="1082" y="406" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">experiments/&lt;id&gt;/</text>
-<text x="1082" y="423" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Config snapshot · results.json · figures · run notes</text>
-<text x="1082" y="437.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">One GitHub issue per experiment, one PR per change;</text>
-<text x="1082" y="452.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">protocol changes need the `needs-adr` template</text>
-<rect x="1068" y="487" width="412" height="148" rx="7" fill="#ecfdf5" stroke="#65a30d" stroke-width="1.2"/>
-<rect x="1068" y="487" width="4.5" height="148" rx="2" fill="#b45309"/>
-<text x="1082" y="506" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Reproducibility contract</text>
-<text x="1082" y="523" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">A result is the triple (config, seed, commit).</text>
-<text x="1082" y="537.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Datasets are a deterministic function of that triple, so</text>
-<text x="1082" y="552.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">storing the config is storing the data — no data repository</text>
-<text x="1082" y="566.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">needed, and a figure can be regenerated years later.</text>
-<text x="1082" y="581.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start"></text>
-<text x="1082" y="595.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">CI runs the tests and the full smoke benchmark on every</text>
-<text x="1082" y="610.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">push, so a change that breaks the protocol fails first.</text>
-<path d="M 340 305 L 372 190" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
-<path d="M 340 455 L 372 380" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
-<path d="M 676 390 L 708 300" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
-<path d="M 1032 440 L 1064 320" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
-<path d="M 676 574 L 708 574" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)" stroke-dasharray="5 4"/>
-<text x="692" y="566" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">per-cell scores</text>
-<text x="354" y="262" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">maps</text>
-<text x="354" y="425" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">train / val</text>
-<text x="692" y="352" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">tuned arms</text>
-<text x="1048" y="388" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="8.8" fill="#475569" font-weight="normal" text-anchor="middle">metrics</text>
-<rect x="40" y="665" width="1000" height="92" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
-<text x="56" y="686" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Tools, constraints and assumptions</text>
-<text x="56" y="706.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Python 3.11 · NumPy / SciPy · scikit-learn · PyTorch (CPU default) · Matplotlib · pytest · ruff · GitHub Actions · Zotero + IEEE</text>
-<text x="56" y="719.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Constraints: no measured passive-radar data — findings are conditional on the group's simulator; latency measured on one CPU, reported with the machine;</text>
-<text x="56" y="733.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">compute bounded by config (map size, dataset size, seed count), so the study scales to the hardware available rather than being redesigned.</text>
-<text x="56" y="746.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Assumptions: ground truth is exact; a detection within ±1 bin is a detection; clutter cancellation and direct-path removal happen upstream of every arm.</text>
-<rect x="1068" y="665" width="412" height="92" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
-<text x="1084" y="686" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Ethics, governance, security</text>
-<text x="1084" y="706.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Synthetic data only — no human participants, no personal data,</text>
-<text x="1084" y="719.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">no transmission. Not human-subject research; confirmed with supervisor.</text>
-<text x="1084" y="733.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Group's simulator is never committed or pushed — licence and embargo</text>
-<text x="1084" y="746.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">govern release; the benchmark can be published even if the simulator cannot.</text>
-<rect x="40" y="775" width="1440" height="86" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
-<text x="56" y="796" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Plan of work</text>
-<text x="56" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#15803d" font-weight="700" text-anchor="start">M1</text>
-<text x="82" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#15803d" font-weight="normal" text-anchor="start">(done)</text>
-<text x="56" y="833.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Protocol, metrics, CFAR baselines,</text>
-<text x="56" y="845.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">stub simulator, CI</text>
-<path d="M 306 814 L 331 814" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#arw)"/>
-<text x="344" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#b45309" font-weight="700" text-anchor="start">M2</text>
-<text x="370" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#b45309" font-weight="normal" text-anchor="start">(in progress)</text>
-<text x="344" y="833.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Group simulator integrated via</text>
-<text x="344" y="845.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">adapter; protocol frozen</text>
-<path d="M 594 814 L 619 814" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#arw)"/>
-<text x="632" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="700" text-anchor="start">M3</text>
-<text x="658" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">(scheduled)</text>
-<text x="632" y="833.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Learned arms tuned at equal budget;</text>
-<text x="632" y="845.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">attention arm added</text>
-<path d="M 882 814 L 907 814" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#arw)"/>
-<text x="920" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="700" text-anchor="start">M4</text>
-<text x="946" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">(scheduled)</text>
-<text x="920" y="833.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Shift tests; cost-constrained</text>
-<text x="920" y="845.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">sweep</text>
-<path d="M 1170 814 L 1195 814" stroke="#cbd5e1" stroke-width="1.6" marker-end="url(#arw)"/>
-<text x="1208" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11" fill="#475569" font-weight="700" text-anchor="start">M5</text>
-<text x="1234" y="818" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9" fill="#475569" font-weight="normal" text-anchor="start">(scheduled)</text>
-<text x="1208" y="833.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">Final 5-seed runs, figures,</text>
-<text x="1208" y="845.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.3" fill="#475569" font-weight="normal" text-anchor="start">write-up</text>
+<text x="40" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#1d4ed8" font-weight="700" text-anchor="start">1 · Acquisition</text>
+<path d="M 40 129 L 308 129" stroke="#1d4ed8" stroke-width="2"/>
+<text x="348" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#1d4ed8" font-weight="700" text-anchor="start">2 · Representation</text>
+<path d="M 348 129 L 598 129" stroke="#1d4ed8" stroke-width="2"/>
+<text x="638" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#6d28d9" font-weight="700" text-anchor="start">3 · Detection statistic</text>
+<path d="M 638 129 L 938 129" stroke="#6d28d9" stroke-width="2"/>
+<text x="978" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#0f766e" font-weight="700" text-anchor="start">4 · Score partition</text>
+<path d="M 978 129 L 1228 129" stroke="#0f766e" stroke-width="2"/>
+<text x="1268" y="122" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="13.5" fill="#0f766e" font-weight="700" text-anchor="start">5 · Metrics</text>
+<path d="M 1268 129 L 1480 129" stroke="#0f766e" stroke-width="2"/>
+<rect x="40" y="145" width="268" height="118" rx="7" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
+<rect x="40" y="145" width="4.5" height="118" rx="2" fill="#1d4ed8"/>
+<text x="54" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Simulated range-Doppler maps</text>
+<text x="54" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Parameterised generator, group-supplied</text>
+<text x="54" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Swept: target range bin, Doppler bin,</text>
+<text x="54" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">SNR (dB), noise power, clutter density</text>
+<text x="54" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Ground truth exact and known</text>
+<text x="54" y="239.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">⚠ generator not yet received (RSK-01)</text>
+<rect x="40" y="279" width="268" height="96" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="5 4"/>
+<rect x="40" y="279" width="4.5" height="96" rx="2" fill="#1d4ed8"/>
+<text x="54" y="298" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Upstream, assumed done</text>
+<text x="54" y="315" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Direct-path removal and clutter</text>
+<text x="54" y="329.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">cancellation happen before any</text>
+<text x="54" y="344.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">detector runs — the ±2-bin zero-</text>
+<text x="54" y="358.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Doppler guard encodes that assumption</text>
+<rect x="40" y="391" width="268" height="92" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="40" y="391" width="4.5" height="92" rx="2" fill="#1d4ed8"/>
+<text x="54" y="410" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Dataset</text>
+<text x="54" y="427" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">(N, R, D) float32` linear power</text>
+<text x="54" y="441.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">per-cell target mask</text>
+<text x="54" y="456.0" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Target(range_bin, doppler_bin, snr_db)</text>
+<rect x="348" y="145" width="250" height="104" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="348" y="145" width="4.5" height="104" rx="2" fill="#1d4ed8"/>
+<text x="362" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">CFAR family input</text>
+<text x="362" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Linear power, no preprocessing.</text>
+<text x="362" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Any transform here would change</text>
+<text x="362" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">the baseline into something other</text>
+<text x="362" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">than the published detector.</text>
+<rect x="348" y="265" width="250" height="104" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="348" y="265" width="4.5" height="104" rx="2" fill="#1d4ed8"/>
+<text x="362" y="284" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Feature family input</text>
+<text x="362" y="301" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">log10(power)`, then multi-scale</text>
+<text x="362" y="315.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">local statistics at three window</text>
+<text x="362" y="330.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">sizes, plus row/column means and</text>
+<text x="362" y="344.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">distance from zero Doppler</text>
+<rect x="348" y="385" width="250" height="98" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="348" y="385" width="4.5" height="98" rx="2" fill="#1d4ed8"/>
+<text x="362" y="404" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Deep family input</text>
+<text x="362" y="421" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">log10(power)`, standardised per map</text>
+<text x="362" y="435.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">(RD dynamic range spans decades;</text>
+<text x="362" y="450.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">without this the networks do not</text>
+<text x="362" y="464.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">train)</text>
+<rect x="638" y="145" width="300" height="96" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="638" y="145" width="4.5" height="96" rx="2" fill="#6d28d9"/>
+<text x="652" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">CFAR — tuned baselines</text>
+<text x="652" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">CA / OS / GO, guard + training window</text>
+<text x="652" y="195.5" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">score = cell / local noise estimate</text>
+<text x="652" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">monotone in the threshold multiplier α</text>
+<rect x="638" y="257" width="300" height="82" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="638" y="257" width="4.5" height="82" rx="2" fill="#6d28d9"/>
+<text x="652" y="276" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Feature-based classifier</text>
+<text x="652" y="293" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Multi-scale statistics → gradient-</text>
+<text x="652" y="307.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">boosted trees, per-cell decision value</text>
+<rect x="638" y="355" width="300" height="82" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="638" y="355" width="4.5" height="82" rx="2" fill="#6d28d9"/>
+<text x="652" y="374" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Deep detectors</text>
+<text x="652" y="391" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Dilated fully-convolutional net (logit)</text>
+<text x="652" y="405.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Patch attention — milestone M3</text>
+<rect x="638" y="453" width="300" height="108" rx="7" fill="#ecfdf5" stroke="#0f766e" stroke-width="1.2"/>
+<rect x="638" y="453" width="4.5" height="108" rx="2" fill="#6d28d9"/>
+<text x="652" y="472" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">One interface, no thresholds</text>
+<text x="652" y="489" font-family="'SF Mono', ui-monospace, Menlo, monospace" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Detector.score(maps) → (N, R, D)</text>
+<text x="652" y="503.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Every arm returns a continuous per-cell</text>
+<text x="652" y="518.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">statistic. The harness owns the</text>
+<text x="652" y="532.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">threshold — that is what makes CFAR and</text>
+<text x="652" y="547.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">a network comparable at one operating point.</text>
+<rect x="860.0" y="462" width="68.0" height="17" rx="8" fill="#6d28d9" stroke="#6d28d9" stroke-width="1.2"/>
+<text x="894.0" y="474" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">ADR-0001</text>
+<rect x="978" y="145" width="250" height="132" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="978" y="145" width="4.5" height="132" rx="2" fill="#0f766e"/>
+<text x="992" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Split the score map</text>
+<text x="992" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Per-target peak within ±1 bin</text>
+<text x="992" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">(tolerates straddle loss)</text>
+<text x="992" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Background = all other cells, minus a</text>
+<text x="992" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">±3-bin exclusion around each target</text>
+<text x="992" y="239.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Zero-Doppler ±2 columns removed</text>
+<text x="992" y="253.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">from both counts</text>
+<rect x="1150.0" y="154" width="68.0" height="17" rx="8" fill="#0f766e" stroke="#0f766e" stroke-width="1.2"/>
+<text x="1184.0" y="166" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">ADR-0003</text>
+<rect x="978" y="293" width="250" height="96" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="978" y="293" width="4.5" height="96" rx="2" fill="#0f766e"/>
+<text x="992" y="312" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Sweep the threshold</text>
+<text x="992" y="329" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Thresholds taken at background-score</text>
+<text x="992" y="343.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">quantiles, so the false-alarm grid is</text>
+<text x="992" y="358.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">exact rather than searched</text>
+<rect x="978" y="405" width="250" height="92" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="978" y="405" width="4.5" height="92" rx="2" fill="#0f766e"/>
+<text x="992" y="424" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Repeat</text>
+<text x="992" y="441" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">5 seeds: training data, test data and</text>
+<text x="992" y="455.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">model initialisation all move together</text>
+<text x="992" y="470.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Mean ± sd reported on every number</text>
+<rect x="1268" y="145" width="212" height="96" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1268" y="145" width="4.5" height="96" rx="2" fill="#0f766e"/>
+<text x="1282" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Pd at fixed Pfa</text>
+<text x="1282" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Per target, at per-cell</text>
+<text x="1282" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Pfa = 10⁻⁵ … 10⁻²</text>
+<text x="1282" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Headline: Pfa = 10⁻³</text>
+<rect x="1437.0" y="154" width="33.0" height="17" rx="8" fill="#0f766e" stroke="#0f766e" stroke-width="1.2"/>
+<text x="1453.5" y="166" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">RQ1</text>
+<rect x="1268" y="257" width="212" height="100" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1268" y="257" width="4.5" height="100" rx="2" fill="#6d28d9"/>
+<text x="1282" y="276" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Stratified Pd</text>
+<text x="1282" y="293" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">By target SNR, range,</text>
+<text x="1282" y="307.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Doppler and clutter</text>
+<text x="1282" y="322.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">density — locates the</text>
+<text x="1282" y="336.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">gain instead of averaging it</text>
+<rect x="1437.0" y="266" width="33.0" height="17" rx="8" fill="#6d28d9" stroke="#6d28d9" stroke-width="1.2"/>
+<text x="1453.5" y="278" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">RQ2</text>
+<rect x="1268" y="373" width="212" height="88" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1268" y="373" width="4.5" height="88" rx="2" fill="#b45309"/>
+<text x="1282" y="392" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Inference cost</text>
+<text x="1282" y="409" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Parameter count and</text>
+<text x="1282" y="423.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">ms per map, measured</text>
+<text x="1282" y="438.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">identically for every arm</text>
+<rect x="1437.0" y="382" width="33.0" height="17" rx="8" fill="#b45309" stroke="#b45309" stroke-width="1.2"/>
+<text x="1453.5" y="394" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.5" fill="#ffffff" font-weight="700" text-anchor="middle">RQ3</text>
+<rect x="1268" y="477" width="212" height="84" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<rect x="1268" y="477" width="4.5" height="84" rx="2" fill="#0f766e"/>
+<text x="1282" y="496" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Interpretation</text>
+<text x="1282" y="513" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Which arm, at what</text>
+<text x="1282" y="527.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">operating point, under</text>
+<text x="1282" y="542.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">what cost budget</text>
+<path d="M 312 204 L 344 197" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 312 437 L 344 320" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 602 197 L 634 193" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 602 317 L 634 298" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 602 434 L 634 396" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 942 300 L 974 211" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 1232 211 L 1264 193" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<path d="M 1232 341 L 1264 300" stroke="#94a3b8" stroke-width="1.8" fill="none" marker-end="url(#arw)"/>
+<rect x="40" y="600" width="1440" height="116" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="56" y="622" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" fill="#0f172a" font-weight="700" text-anchor="start">What is fixed before any model is tuned</text>
+<text x="56" y="644" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">One code path — `evaluation/protocol.py` runs every arm through the same generation, partition, sweep and cost measurement; arms differ only in `score()`.</text>
+<text x="56" y="661" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Equal tuning budget — CFAR gets the same number of configuration trials as the networks, on a validation split disjoint from training and test. A baseline left at default settings is the flaw this project measures.</text>
+<text x="56" y="678" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Protocol frozen at milestone M2, before the deep models are tuned. Any later change to metric, tolerance, guard, splits or seeds requires an Architecture Decision Record and a re-run of every arm.</text>
+<text x="56" y="695" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Figures and their axes specified in advance, so they cannot be selected after the fact to suit the numbers.</text>
+<rect x="40" y="736" width="1440" height="124" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
+<text x="56" y="758" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" fill="#0f172a" font-weight="700" text-anchor="start">Tools, constraints and assumptions</text>
+<text x="56" y="780" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Tools — Python 3.11 · NumPy / SciPy · scikit-learn · PyTorch (CPU by default) · Matplotlib · pytest · ruff · GitHub Actions · Zotero with IEEE style.</text>
+<text x="56" y="797" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Constraints — no measured passive-radar data, so every finding is conditional on the group's simulator and is reported as such; latency measured on one machine and reported with it;</text>
+<text x="56" y="814" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">compute bounded by configuration (map size, dataset size, seed count), so the study scales to available hardware rather than being redesigned.</text>
+<text x="56" y="831" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Assumptions — ground truth is exact; a detection within ±1 bin counts as a detection; direct-path removal and clutter cancellation are performed upstream of every arm, identically.</text>
+<text x="56" y="848" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Out of scope — designing a new detector architecture, and any claim about measured data. The contribution is the comparison, not a new detector.</text>
 </svg>
