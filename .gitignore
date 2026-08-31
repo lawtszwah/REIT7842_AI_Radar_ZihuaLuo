@@ -7,8 +7,10 @@ __pycache__/
 .ruff_cache/
 .DS_Store
 
-# Datasets are regenerated from (config, seed); never committed.
-data/
+# Generated datasets are regenerated from (config, seed); never committed.
+# Anchored to the repo root so it cannot swallow src/prdbench/data/ or configs/data/.
+/data/
+/datasets/
 *.npz
 *.npy
 *.h5

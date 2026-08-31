@@ -1,0 +1,10 @@
+# Generalisation probe: parameter regimes deliberately outside the training grid.
+# Answers research question 2 -- where do any gains actually occur?
+simulator: group
+test:
+  n_maps: 2000
+  n_range: 128
+  n_doppler: 128
+  snr_db: [-6.0, -1.0]        # weaker than anything seen in training
+  noise_power: [4.0, 8.0]     # higher noise floor than training
+  clutter_patches: [6, 12]    # heavier clutter than training
