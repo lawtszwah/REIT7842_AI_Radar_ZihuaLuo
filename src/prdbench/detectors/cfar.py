@@ -82,7 +82,6 @@ class GOCFAR(Detector):
     def score(self, maps: np.ndarray) -> np.ndarray:
         maps = np.asarray(maps, dtype=np.float32)
         t, g = self.train, self.guard
-        k = np.zeros((1, 2 * (t + g) + 1, 1), dtype=np.float32)
         lead, lag = [], []
         for m in maps:
             padded = np.pad(m, ((t + g, t + g), (0, 0)), mode="edge")

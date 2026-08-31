@@ -13,7 +13,6 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import numpy as np
 
 STYLE = {"cfar": "-", "feature": "--", "deep": "-."}
 
@@ -35,9 +34,14 @@ def render(results_path: Path, out_dir: Path) -> list[Path]:
     ax.set_xlabel("Probability of false alarm (per cell)")
     ax.set_ylabel("Probability of detection (per target)")
     ax.set_title("ROC under the shared evaluation protocol")
-    ax.set_ylim(0, 1); ax.grid(alpha=0.3); ax.legend(fontsize=7, loc="upper left")
-    fig.tight_layout(); p = out_dir / "roc.png"; fig.savefig(p, dpi=200); written.append(p)
+    ax.set_ylim(0, 1)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=7, loc="upper left")
+    fig.tight_layout()
+    p = out_dir / "roc.png"
+    fig.savefig(p, dpi=200)
     plt.close(fig)
+    written.append(p)
 
     # 2. Where the gains are: Pd at fixed Pfa, stratified by target SNR.
     fig, ax = plt.subplots(figsize=(5.2, 3.9))
@@ -49,9 +53,14 @@ def render(results_path: Path, out_dir: Path) -> list[Path]:
     ax.set_xlabel("Target SNR (dB)")
     ax.set_ylabel(f"Pd at Pfa = {ref_pfa:g}")
     ax.set_title("Where detections are won or lost")
-    ax.set_ylim(0, 1); ax.grid(alpha=0.3); ax.legend(fontsize=7, loc="upper left")
-    fig.tight_layout(); p = out_dir / "pd_by_snr.png"; fig.savefig(p, dpi=200); written.append(p)
+    ax.set_ylim(0, 1)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=7, loc="upper left")
+    fig.tight_layout()
+    p = out_dir / "pd_by_snr.png"
+    fig.savefig(p, dpi=200)
     plt.close(fig)
+    written.append(p)
 
     # 3. Accuracy retained under an inference-cost constraint.
     fig, ax = plt.subplots(figsize=(5.2, 3.9))
@@ -66,8 +75,11 @@ def render(results_path: Path, out_dir: Path) -> list[Path]:
     ax.set_ylabel(f"Pd at Pfa = {ref_pfa:g}")
     ax.set_title("Detection performance against inference cost")
     ax.grid(alpha=0.3)
-    fig.tight_layout(); p = out_dir / "pd_vs_cost.png"; fig.savefig(p, dpi=200); written.append(p)
+    fig.tight_layout()
+    p = out_dir / "pd_vs_cost.png"
+    fig.savefig(p, dpi=200)
     plt.close(fig)
+    written.append(p)
 
     # Machine-readable summary table for the write-up.
     rows = []
@@ -80,7 +92,8 @@ def render(results_path: Path, out_dir: Path) -> list[Path]:
             row[f"sd@{p_:g}"] = round(d[f"pd@pfa={p_:g}"]["std"], 3)
         rows.append(row)
     p = out_dir / "summary.json"
-    p.write_text(json.dumps(rows, indent=2)); written.append(p)
+    p.write_text(json.dumps(rows, indent=2))
+    written.append(p)
     return written
 
 

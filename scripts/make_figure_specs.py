@@ -42,7 +42,9 @@ def build(out_dir: Path) -> list[Path]:
 
     # 1 -- ROC
     fig, ax = plt.subplots(figsize=(5.2, 3.9))
-    ax.set_xscale("log"); ax.set_xlim(1e-5, 1e-1); ax.set_ylim(0, 1)
+    ax.set_xscale("log")
+    ax.set_xlim(1e-5, 1e-1)
+    ax.set_ylim(0, 1)
     ax.set_xlabel("Probability of false alarm (per cell)")
     ax.set_ylabel("Probability of detection (per target)")
     ax.axvline(1e-3, color="#94a3b8", ls=":", lw=1.1)
@@ -52,12 +54,16 @@ def build(out_dir: Path) -> list[Path]:
                "Solid = CFAR, dashed = feature-based, dot-dash = deep.",
                "Shaded band = ±1 sd over 5 seeds.",
                "Headline number is read at Pfa = 10⁻³."])
-    fig.tight_layout(); p = out_dir / "spec_roc.png"; fig.savefig(p, dpi=200); plt.close(fig)
+    fig.tight_layout()
+    p = out_dir / "spec_roc.png"
+    fig.savefig(p, dpi=200)
+    plt.close(fig)
     written.append(p)
 
     # 2 -- Pd by SNR
     fig, ax = plt.subplots(figsize=(5.2, 3.9))
-    ax.set_xlim(-4, 16); ax.set_ylim(0, 1)
+    ax.set_xlim(-4, 16)
+    ax.set_ylim(0, 1)
     ax.set_xlabel("Target SNR (dB)")
     ax.set_ylabel("Pd at Pfa = 10⁻³")
     ax.set_xticks([-4, 0, 4, 8, 12, 16])
@@ -68,12 +74,17 @@ def build(out_dir: Path) -> list[Path]:
                "a gain concentrated at low SNR means something",
                "different from a gain spread evenly.",
                "Companion panels: by range, Doppler, clutter density."])
-    fig.tight_layout(); p = out_dir / "spec_pd_by_snr.png"; fig.savefig(p, dpi=200); plt.close(fig)
+    fig.tight_layout()
+    p = out_dir / "spec_pd_by_snr.png"
+    fig.savefig(p, dpi=200)
+    plt.close(fig)
     written.append(p)
 
     # 3 -- Pd vs cost
     fig, ax = plt.subplots(figsize=(5.2, 3.9))
-    ax.set_xscale("log"); ax.set_xlim(1e-2, 1e2); ax.set_ylim(0, 1)
+    ax.set_xscale("log")
+    ax.set_xlim(1e-2, 1e2)
+    ax.set_ylim(0, 1)
     ax.set_xlabel("Inference latency (ms per map, CPU)")
     ax.set_ylabel("Pd at Pfa = 10⁻³")
     _frame(ax, "Figure 3 — performance against inference cost   [RQ3]")
@@ -82,7 +93,10 @@ def build(out_dir: Path) -> list[Path]:
                "The Pareto frontier is the deliverable: which arm",
                "is best once a latency budget is imposed.",
                "Same machine, same batch size, median of 10 runs."])
-    fig.tight_layout(); p = out_dir / "spec_pd_vs_cost.png"; fig.savefig(p, dpi=200); plt.close(fig)
+    fig.tight_layout()
+    p = out_dir / "spec_pd_vs_cost.png"
+    fig.savefig(p, dpi=200)
+    plt.close(fig)
     written.append(p)
     return written
 

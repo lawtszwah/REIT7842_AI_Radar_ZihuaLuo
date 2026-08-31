@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from _svg import (ACCENT, Canvas, FILL, KEY_FILL, KEY_LINE, LINE, MUTED,
-                  STORE_FILL, STORE_LINE, WARN_FILL, WARN_LINE)
+                  WARN_FILL, WARN_LINE)
 
 HEAD_SUB = ("Zihua Luo (49528923) · REIT7842 · supervisor Dr Lu Zhang · "
             "Benchmarking ML detectors against CFAR baselines in passive radar")
