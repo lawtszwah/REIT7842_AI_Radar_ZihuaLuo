@@ -22,7 +22,7 @@ class Detector(abc.ABC):
     def __init__(self, **params):
         self.params = params
 
-    def fit(self, maps: np.ndarray, labels: np.ndarray | None = None, **kw) -> "Detector":
+    def fit(self, maps: np.ndarray, labels: np.ndarray | None = None, **kw) -> Detector:
         """Fit on training maps.  No-op for the CFAR family."""
         return self
 

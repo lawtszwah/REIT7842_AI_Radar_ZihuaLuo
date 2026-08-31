@@ -21,7 +21,8 @@ from ..evaluation import metrics
 
 def grid(space: dict) -> list[dict]:
     keys = list(space)
-    return [dict(zip(keys, vals)) for vals in itertools.product(*(space[k] for k in keys))]
+    return [dict(zip(keys, vals, strict=True))
+            for vals in itertools.product(*(space[k] for k in keys))]
 
 
 def search(simulator: str, data_cfg: dict, kind: str, space: dict, budget: int,

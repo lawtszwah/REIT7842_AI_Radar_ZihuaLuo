@@ -18,7 +18,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4", "ruff>=0.4"]
+# ruff is pinned: an unpinned linter means CI can turn red with no code change,
+# because a new release adds rules. Bump this deliberately, in its own commit.
+dev = ["pytest>=7.4", "ruff==0.16.5"]
 
 [project.scripts]
 prdbench = "prdbench.cli:main"
@@ -32,3 +34,14 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+# Errors, pyflakes, import order, pyupgrade and bugbear. Deliberately not the
+# broader stylistic rule sets: a linter that argues about taste gets ignored,
+# and the checks that matter here are correctness and determinism.
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# The diagram scripts hold long prose strings that are the diagram copy;
+# wrapping them would make the source harder to edit, not easier.
+"scripts/make_diagrams.py" = ["E501"]

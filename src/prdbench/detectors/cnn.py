@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import numpy as np
 import torch
-import torch.nn as nn
+from torch import nn
 
 from .base import Detector
 
@@ -55,7 +55,7 @@ class DilatedCNN(Detector):
         torch.manual_seed(seed)
         self.model = _Net(width, depth).to(self.device)
 
-    def fit(self, maps: np.ndarray, labels: np.ndarray, **kw) -> "DilatedCNN":
+    def fit(self, maps: np.ndarray, labels: np.ndarray, **kw) -> DilatedCNN:
         torch.manual_seed(self.seed)
         x = _normalise(maps)
         y = torch.from_numpy(labels.astype(np.float32)).unsqueeze(1)

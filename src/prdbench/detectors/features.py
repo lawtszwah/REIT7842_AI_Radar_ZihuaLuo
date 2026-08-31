@@ -64,7 +64,7 @@ class FeatureGBDT(Detector):
             max_depth=max_depth, random_state=seed,
         )
 
-    def fit(self, maps: np.ndarray, labels: np.ndarray, **kw) -> "FeatureGBDT":
+    def fit(self, maps: np.ndarray, labels: np.ndarray, **kw) -> FeatureGBDT:
         rng = np.random.default_rng(self.seed)
         feats = cell_features(maps)
         n, nr, nd, nf = feats.shape

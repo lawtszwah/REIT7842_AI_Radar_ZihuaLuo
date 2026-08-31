@@ -20,5 +20,5 @@ def measure_latency(detector, maps: np.ndarray, repeats: int = 5, warmup: int = 
         "latency_s_per_map_median": float(np.median(times)),
         "latency_s_per_map_iqr": float(np.subtract(*np.percentile(times, [75, 25]))),
         "n_repeats": repeats,
-        "n_maps": int(len(maps)),
+        "n_maps": len(maps),
     }

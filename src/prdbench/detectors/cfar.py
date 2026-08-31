@@ -9,7 +9,7 @@ same footing as the learned detectors instead of at one arbitrary alpha.
 from __future__ import annotations
 
 import numpy as np
-from scipy.ndimage import uniform_filter, percentile_filter
+from scipy.ndimage import percentile_filter, uniform_filter
 
 from .base import Detector
 

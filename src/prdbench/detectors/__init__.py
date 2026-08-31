@@ -1,8 +1,8 @@
+from .attention import PatchAttention
 from .base import Detector
 from .cfar import CACFAR, GOCFAR, OSCFAR
-from .features import FeatureGBDT
 from .cnn import DilatedCNN
-from .attention import PatchAttention
+from .features import FeatureGBDT
 
 REGISTRY = {
     "ca_cfar": CACFAR,
@@ -20,4 +20,4 @@ def build(kind: str, **params) -> Detector:
     return REGISTRY[kind](**params)
 
 
-__all__ = ["Detector", "REGISTRY", "build"]
+__all__ = ["REGISTRY", "Detector", "build"]

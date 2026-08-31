@@ -24,7 +24,8 @@ def test_pd_is_monotone_in_pfa():
     ds = _small()
     tgt, bg, _ = metrics.split_scores(build("ca_cfar").score(ds.maps), ds.targets)
     pds = [metrics.pd_at_pfa(tgt, bg, p) for p in (1e-4, 1e-3, 1e-2, 1e-1)]
-    assert all(a <= b + 1e-9 for a, b in zip(pds, pds[1:]))
+    # strict=False is deliberate: successive pairs, so the operands differ in length.
+    assert all(a <= b + 1e-9 for a, b in zip(pds, pds[1:], strict=False))
 
 
 def test_strong_targets_are_detectable():

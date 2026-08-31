@@ -89,8 +89,8 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
                 "roc": {"pfa": pfa_c.tolist(), "pd": pd_c.tolist()},
                 "cost": cost.measure_latency(det, test.maps, repeats=proto.latency_repeats)
                 | {"n_parameters": det.n_parameters()},
-                "n_targets": int(len(tgt)),
-                "n_background_cells": int(len(bg)),
+                "n_targets": len(tgt),
+                "n_background_cells": len(bg),
             }
             per_seed.setdefault(rec["key"], []).append(rec)
 

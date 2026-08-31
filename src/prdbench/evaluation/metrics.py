@@ -76,7 +76,7 @@ def pd_by_snr(tgt_scores: np.ndarray, tgt_snr: np.ndarray, bg_scores: np.ndarray
     """Where do gains occur?  Pd at fixed Pfa, stratified by target SNR."""
     thr = np.quantile(bg_scores, 1.0 - pfa)
     out = []
-    for lo, hi in zip(edges[:-1], edges[1:]):
+    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
         sel = (tgt_snr >= lo) & (tgt_snr < hi)
         out.append({
             "snr_lo": float(lo), "snr_hi": float(hi), "n": int(sel.sum()),
