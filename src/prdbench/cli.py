@@ -9,6 +9,7 @@ from pathlib import Path
 import yaml
 
 from .evaluation.protocol import run_benchmark
+from .reporting import render
 from .tuning.search import search
 
 
@@ -59,7 +60,10 @@ def main(argv=None) -> int:
         return 0
 
     if a.cmd == "report":
-        from scripts_report import render  # noqa: F401
+        results = Path(a.results)
+        out = Path(a.out) if a.out else results.parent / "figures"
+        for f in render(results, out):
+            print(f)
         return 0
 
     return 1

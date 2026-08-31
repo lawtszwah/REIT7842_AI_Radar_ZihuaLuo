@@ -35,7 +35,7 @@ See `docs/decisions/ADR-0001-per-cell-score-interface.md`.
 pip install -e ".[dev]"
 pytest                                                    # contract + protocol tests
 prdbench run --config configs/protocol/smoke.yaml --out results/smoke
-python scripts/make_figures.py --results results/smoke/results.json --out results/smoke/figures
+prdbench report --results results/smoke/results.json
 ```
 
 `smoke.yaml` runs in ~2 minutes on a laptop CPU using the **stand-in simulator**. It
@@ -54,6 +54,8 @@ src/prdbench/
                 features.py    multi-scale local statistics + gradient-boosted trees
                 cnn.py         small dilated fully-convolutional per-cell detector
                 attention.py   third model family — interface fixed, implementation is M3
+  reporting.py  render()       figures + summary table; `prdbench report` and
+                               scripts/make_figures.py share this one code path
   evaluation/   metrics.py     Pd per target, Pfa per cell, ROC, SNR stratification
                 cost.py        parameter count and per-map inference latency
                 protocol.py    the single code path all detectors go through
