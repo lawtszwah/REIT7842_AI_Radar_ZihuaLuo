@@ -1,7 +1,7 @@
 {
   "run": {
-    "started": "2026-08-31T18:33:13",
-    "git_commit": "unknown",
+    "started": "2026-08-31T18:36:22",
+    "git_commit": "59839537d537367491d3b31c0e4768358444c025",
     "python": "3.13.9",
     "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
     "numpy": "1.26.4",
@@ -181,8 +181,8 @@
         "std": 0.01481213872832371
       },
       "latency_s_per_map": {
-        "mean": 2.6668017508200137e-05,
-        "std": 1.4906248907209496e-07
+        "mean": 2.5426877527934266e-05,
+        "std": 1.4627074961026651e-06
       },
       "n_parameters": 0,
       "runs": [
@@ -637,8 +637,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 2.6518955019128042e-05,
-            "latency_s_per_map_iqr": 1.059164987964325e-06,
+            "latency_s_per_map_median": 2.39641700318316e-05,
+            "latency_s_per_map_iqr": 4.512499981501615e-07,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -1097,8 +1097,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 2.6817079997272232e-05,
-            "latency_s_per_map_iqr": 1.1363525118213154e-06,
+            "latency_s_per_map_median": 2.688958502403693e-05,
+            "latency_s_per_map_iqr": 1.1377099872333924e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -1135,8 +1135,8 @@
         "std": 0.030671965317919048
       },
       "latency_s_per_map": {
-        "mean": 0.004587857917504152,
-        "std": 0.00011825833251350587
+        "mean": 0.00449081197999476,
+        "std": 0.00010378385501098831
       },
       "n_parameters": 0,
       "runs": [
@@ -1592,8 +1592,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.0044695995849906465,
-            "latency_s_per_map_iqr": 1.7890417493617375e-05,
+            "latency_s_per_map_median": 0.004387028124983772,
+            "latency_s_per_map_iqr": 1.1778125190179886e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -2053,8 +2053,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.004706116250017658,
-            "latency_s_per_map_iqr": 1.3919059983892243e-05,
+            "latency_s_per_map_median": 0.0045945958350057485,
+            "latency_s_per_map_iqr": 1.2738440000248895e-05,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -2090,8 +2090,8 @@
         "std": 0.005202312138728293
       },
       "latency_s_per_map": {
-        "mean": 4.564645749269403e-05,
-        "std": 2.0770750779774998e-07
+        "mean": 4.487103999053943e-05,
+        "std": 1.1745849951694248e-06
       },
       "n_parameters": 0,
       "runs": [
@@ -2546,8 +2546,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 4.543874998489628e-05,
-            "latency_s_per_map_iqr": 6.171874883875719e-07,
+            "latency_s_per_map_median": 4.3696454995370004e-05,
+            "latency_s_per_map_iqr": 4.251024984114343e-07,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -3006,8 +3006,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 4.585416500049178e-05,
-            "latency_s_per_map_iqr": 1.5913549941615136e-06,
+            "latency_s_per_map_median": 4.6045624985708853e-05,
+            "latency_s_per_map_iqr": 1.4430174996959939e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 0
@@ -3046,8 +3046,8 @@
         "std": 0.019580924855491344
       },
       "latency_s_per_map": {
-        "mean": 0.0019624423974892126,
-        "std": 2.3105937507352826e-05
+        "mean": 0.001970406769996771,
+        "std": 2.3809270005585993e-05
       },
       "n_parameters": 4880,
       "runs": [
@@ -3505,8 +3505,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.0019393364599818597,
-            "latency_s_per_map_iqr": 3.896460002579191e-06,
+            "latency_s_per_map_median": 0.001946597499991185,
+            "latency_s_per_map_iqr": 7.429269990097973e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 4880
@@ -3968,8 +3968,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.0019855483349965654,
-            "latency_s_per_map_iqr": 2.7069775023849142e-06,
+            "latency_s_per_map_median": 0.001994216040002357,
+            "latency_s_per_map_iqr": 9.84187499852851e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 4874
@@ -4010,8 +4010,8 @@
         "std": 0.04441835260115612
       },
       "latency_s_per_map": {
-        "mean": 0.0006630305225189658,
-        "std": 1.2007274926872685e-06
+        "mean": 0.0006726611475096434,
+        "std": 7.548647481598898e-06
       },
       "n_parameters": 7265,
       "runs": [
@@ -4471,8 +4471,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.0006618297950262786,
-            "latency_s_per_map_iqr": 4.55791749118359e-06,
+            "latency_s_per_map_median": 0.0006651125000280444,
+            "latency_s_per_map_iqr": 9.456664993194759e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 7265
@@ -4936,8 +4936,8 @@
             ]
           },
           "cost": {
-            "latency_s_per_map_median": 0.0006642312500116531,
-            "latency_s_per_map_iqr": 3.6400000135472814e-06,
+            "latency_s_per_map_median": 0.0006802097949912422,
+            "latency_s_per_map_iqr": 5.3475024833460035e-06,
             "n_repeats": 3,
             "n_maps": 200,
             "n_parameters": 7265
