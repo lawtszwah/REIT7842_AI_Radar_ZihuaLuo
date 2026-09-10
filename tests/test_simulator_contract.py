@@ -1,4 +1,5 @@
-"""Conformance tests every simulator must pass -- stub today, the group's tomorrow."""
+"""Conformance tests every simulator must pass -- the development generator today,
+the validated simulator from M2 onwards."""
 
 import numpy as np
 import pytest
@@ -28,6 +29,7 @@ def test_seed_reproducibility():
     assert np.array_equal(a.maps, b.maps)
 
 
-def test_group_simulator_is_flagged_as_unavailable():
+def test_pending_simulator_is_flagged_as_unimplemented():
+    """`full.yaml` names the validated simulator, so it must fail loudly until M2."""
     with pytest.raises(NotImplementedError):
-        get_simulator("group").generate(SimConfig(n_maps=1))
+        get_simulator("prdsim")

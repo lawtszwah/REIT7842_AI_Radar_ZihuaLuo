@@ -1,6 +1,6 @@
 # The protocol the thesis results will be reported under.
 # Frozen before the deep models are tuned; changes require an ADR.
-simulator: group          # falls back to `stub` only via --simulator stub
+simulator: prdsim         # the validated in-project simulator (M2); `stub` is not reportable
 
 train:
   n_maps: 4000

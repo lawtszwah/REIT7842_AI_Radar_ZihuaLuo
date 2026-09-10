@@ -1,6 +1,6 @@
 # ADR-0002 — The simulator sits behind an interface, with a stand-in
 
-**Status:** accepted · **Date:** 2026-08-31
+**Status:** accepted · **Date:** 2026-08-31 · **Superseded in part by:** ADR-0004 (2026-09-09)
 
 ## Context
 
@@ -25,3 +25,12 @@ interface. Make `tests/test_simulator_contract.py` the acceptance test both must
 * Risk of contamination: stub results could be mistaken for findings. Every `SimBatch`
   carries `simulator` and a warning string into `results.json`, and the README states that
   stub results are not reportable.
+
+## Superseded in part
+
+ADR-0004 records that the research group will not supply the function after all, so the
+simulator is built in-project. The interface decision above stands and is the reason the
+change costs nothing downstream: detectors, metrics, tuning and reporting never depended
+on where a `SimBatch` came from. What lapses is everything predicated on an *external*
+supplier — `adapter.py` (deleted), the `group` simulator name, and the divergence risk of
+an unknown parameterisation (old RSK-02).

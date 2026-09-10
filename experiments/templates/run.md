@@ -3,7 +3,7 @@
 * **Research question:** RQ_
 * **Config:** `configs/...` (snapshot in `results.json`)
 * **Commit:** `<hash>`
-* **Simulator:** stub / group v_
+* **Simulator:** stub / prdsim v_
 * **Seeds:** 
 * **Machine:** 
 

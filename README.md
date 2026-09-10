@@ -38,7 +38,7 @@ prdbench run --config configs/protocol/smoke.yaml --out results/smoke
 prdbench report --results results/smoke/results.json
 ```
 
-`smoke.yaml` runs in ~2 minutes on a laptop CPU using the **stand-in simulator**. It
+`smoke.yaml` runs in ~2 minutes on a laptop CPU using the **development generator**. It
 exists to prove the pipeline, not to produce findings — see the warning below.
 
 ## Repository layout
@@ -46,8 +46,8 @@ exists to prove the pipeline, not to produce findings — see the warning below.
 ```
 src/prdbench/
   simulation/   interface.py   contract the simulator must satisfy (SimConfig -> SimBatch)
-                stub.py        stand-in generator, used until the group's function arrives
-                adapter.py     one-file drop-in point for the group's function
+                stub.py        development generator — proves the pipeline, not reportable;
+                               superseded at M2 by the validated simulator
   data/         generate.py    (config, seed) -> maps + per-cell labels + ground truth
   detectors/    base.py        Detector ABC: fit / score / n_parameters
                 cfar.py        CA-, OS-, GO-CFAR, tuned under the same budget as the ML models
@@ -71,21 +71,30 @@ docs/           ADRs, risk register, data-management and reproducibility plans
 
 ## ⚠ Simulator status
 
-The parameterised range-Doppler simulation function is supplied by the research group
-and **has not been received yet** (risk RSK-01). Until it is:
+The research group confirmed on 2026-09-09 that it will **not** supply the range-Doppler
+simulation function: the simulator is written in-project (see
+`docs/decisions/ADR-0004-simulator-is-built-in-project.md`). That removes the external
+dependency and adds an obligation — the signal model is now part of the work and has to be
+justified and validated rather than assumed. Until it is (milestone M2):
 
-* `simulation/stub.py` generates stand-in maps — complex Gaussian noise, a zero-Doppler
-  direct-path ridge, clutter patches, and sinc-response targets at specified SNR.
-* Every run tags its output `simulator: "stub"`, and no stub result is reportable.
-* `tests/test_simulator_contract.py` is the acceptance test the group's function must
-  pass, so the handover is a defined task rather than an open-ended integration.
+* `simulation/stub.py` is the development generator — complex Gaussian noise, a
+  zero-Doppler direct-path ridge, clutter patches, and sinc-response targets at specified
+  SNR. It exists so the rest of the pipeline can be built and tested.
+* Every run tags its output `simulator: "stub"`, and **no `stub` result is reportable**.
+* `tests/test_simulator_contract.py` is the acceptance test any simulator must pass, so
+  replacing the development generator with the validated one is a defined task.
+* Validation planned at M2, and reported with the frozen protocol: the target-free noise
+  floor against the distribution it should follow, a single target's peak against the SNR
+  it was generated at, and CA-CFAR's measured Pfa on target-free maps against its design
+  Pfa — the last being the evidence that the classical baselines are being given a fair
+  test on the background they assume.
 
 ## Plan of work
 
 | Milestone | Content | Status |
 |---|---|---|
-| M1 | Protocol, metrics, CFAR baselines, stub simulator, CI | ✅ done — this repo |
-| M2 | Group simulator integrated via `adapter.py`; protocol frozen | in progress |
+| M1 | Protocol, metrics, CFAR baselines, development generator, CI | ✅ done — this repo |
+| M2 | Simulator built and validated behind the interface; protocol frozen | in progress |
 | M3 | Feature classifier and CNN tuned at equal budget; attention arm added | scheduled |
 | M4 | Shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | scheduled |
 | M5 | Final runs at 5 seeds, figures, thesis write-up | scheduled |

@@ -1,9 +1,10 @@
 """Contract between the benchmark and whatever produces range-Doppler maps.
 
-The parameterised simulation function is supplied by the research group and is
-not yet in hand.  Everything downstream of this module is written against the
-`RDMapSimulator` protocol below, so the group's function can be dropped in via
-`adapter.py` without touching the detectors or the evaluation harness.
+The simulator is written in-project (ADR-0004); the validated model is milestone
+M2 work and `stub.py` stands in for it during development.  Everything downstream
+of this module is written against the `RDMapSimulator` protocol below, so nothing
+in the detectors or the evaluation harness depends on which generator produced a
+`SimBatch` -- only on the shape of the contract.
 """
 
 from __future__ import annotations

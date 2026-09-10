@@ -17,7 +17,7 @@ data, contributes no new detection capability, and is reported openly.
 
 | Asset | Volume | Where it lives | Retention |
 |---|---|---|---|
-| Simulator function (group-supplied) | small | supplied by the research group; **not redistributed** in this repository unless the group agrees in writing | per group's terms |
+| Simulator source code (written in-project) | small | version-controlled in this repository and released with it | permanent |
 | Generated range-Doppler datasets | 10s of GB at full scale | regenerated on demand, never committed (`.gitignore`) | transient |
 | Configs and seeds | KB | version-controlled | permanent |
 | `results.json` per run + figures | MB | version-controlled under `experiments/` | permanent |
@@ -30,9 +30,10 @@ data repository.
 ## Licensing and sharing
 
 * Code: released under an OSI licence at submission (`LICENSE`), so results can be re-run.
-* Simulator: **check before publishing.** It is the research group's, and its licence and
-  any embargo govern what can be shared. `adapter.py` deliberately keeps it out of this
-  repository so that the benchmark can be released even if the simulator cannot.
+* Simulator: written for this project and released under the same licence as the rest of
+  the code. Since the datasets are a deterministic function of `(config, seed)` and the
+  generator that consumes them is public, a third party can regenerate every reported
+  number — the benchmark is reproducible end to end rather than up to a missing component.
 * Figures and `results.json`: released with the thesis.
 
 ## Version control and integrity
@@ -46,6 +47,8 @@ data repository.
 
 ## Security
 
-Nothing here is sensitive. The one control that matters: the group's simulator must not be
-committed or pushed to a public remote. `.gitignore` covers the expected drop location and
-this is checked at every merge.
+Nothing here is sensitive, and with the simulator written in-project there is no
+third-party code whose release is restricted. The controls that remain are about size and
+about provenance, not secrecy: datasets and model checkpoints are never committed
+(`.gitignore` covers both), and every result carries the simulator name and version that
+produced it so that a development-generator run can never be mistaken for a finding.

@@ -1,6 +1,6 @@
 # Generalisation probe: parameter regimes deliberately outside the training grid.
 # Answers research question 2 -- where do any gains actually occur?
-simulator: group
+simulator: prdsim
 test:
   n_maps: 2000
   n_range: 128

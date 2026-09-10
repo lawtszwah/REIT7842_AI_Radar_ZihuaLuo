@@ -16,7 +16,7 @@ config + seed  ──▶  dataset            (regenerated, never stored)
 
 * git commit hash of the working tree that produced it
 * Python, NumPy versions and platform string
-* simulator name and version (`stub` vs `group`) — stub results are flagged unusable
+* simulator name and version (`stub` vs `prdsim`) — `stub` results are flagged unusable
 * the complete spec: data config, detector configs, protocol config
 * per-seed results, not just the aggregate, so variance is inspectable
 

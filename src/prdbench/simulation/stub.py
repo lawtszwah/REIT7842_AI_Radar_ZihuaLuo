@@ -1,11 +1,14 @@
-"""Stand-in simulator used until the group's function is available.
+"""Development generator, standing in for the validated simulator (milestone M2).
 
 It is deliberately simple and deliberately NOT a research contribution: its
 only job is to let the whole pipeline -- generation, tuning, detection,
-evaluation, reporting -- run end to end today, so that swapping in the real
-simulator is a one-file change rather than a rewrite.  Results produced with
-this simulator are marked `simulator="stub"` in every manifest and must never
-be reported as project findings.
+evaluation, reporting -- run end to end today, so that replacing it is a
+one-file change rather than a rewrite.  The signal model that reported results
+will be produced under has to be justified against the literature and validated
+against analytically predictable behaviour first; nothing here has been.
+Results produced with this generator are marked `simulator="stub"` in every
+manifest and must never be reported as project findings.  See
+docs/decisions/ADR-0004-simulator-is-built-in-project.md.
 """
 
 from __future__ import annotations
@@ -84,7 +87,7 @@ class StubSimulator:
             "simulator_version": self.version,
             "seed": config.seed,
             "config": config.__dict__ | {"extra": dict(config.extra)},
-            "warning": "synthetic stand-in, not the research group's simulator",
+            "warning": "development generator; the validated simulator is M2 work",
         }
         return SimBatch(maps=maps, targets=all_targets, meta=meta)
 

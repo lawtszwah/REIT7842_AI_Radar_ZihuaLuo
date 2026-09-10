@@ -22,11 +22,11 @@
 <rect x="40" y="145" width="268" height="118" rx="7" fill="#fef3c7" stroke="#d97706" stroke-width="1.2"/>
 <rect x="40" y="145" width="4.5" height="118" rx="2" fill="#1d4ed8"/>
 <text x="54" y="164" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Simulated range-Doppler maps</text>
-<text x="54" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Parameterised generator, group-supplied</text>
+<text x="54" y="181" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Parameterised generator, built in-project</text>
 <text x="54" y="195.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Swept: target range bin, Doppler bin,</text>
 <text x="54" y="210.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">SNR (dB), noise power, clutter density</text>
 <text x="54" y="224.5" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">Ground truth exact and known</text>
-<text x="54" y="239.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">⚠ generator not yet received (RSK-01)</text>
+<text x="54" y="239.0" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.6" fill="#475569" font-weight="normal" text-anchor="start">⚠ signal model validated at M2 (RSK-01)</text>
 <rect x="40" y="279" width="268" height="96" rx="7" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="5 4"/>
 <rect x="40" y="279" width="4.5" height="96" rx="2" fill="#1d4ed8"/>
 <text x="54" y="298" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="11.5" fill="#0f172a" font-weight="700" text-anchor="start">Upstream, assumed done</text>
@@ -158,7 +158,7 @@
 <rect x="40" y="736" width="1440" height="124" rx="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.2"/>
 <text x="56" y="758" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="12" fill="#0f172a" font-weight="700" text-anchor="start">Tools, constraints and assumptions</text>
 <text x="56" y="780" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Tools — Python 3.11 · NumPy / SciPy · scikit-learn · PyTorch (CPU by default) · Matplotlib · pytest · ruff · GitHub Actions · Zotero with IEEE style.</text>
-<text x="56" y="797" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Constraints — no measured passive-radar data, so every finding is conditional on the group's simulator and is reported as such; latency measured on one machine and reported with it;</text>
+<text x="56" y="797" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Constraints — no measured passive-radar data, so every finding is conditional on the project's own simulator and is reported as such; latency measured on one machine and reported with it;</text>
 <text x="56" y="814" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">compute bounded by configuration (map size, dataset size, seed count), so the study scales to available hardware rather than being redesigned.</text>
 <text x="56" y="831" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Assumptions — ground truth is exact; a detection within ±1 bin counts as a detection; direct-path removal and clutter cancellation are performed upstream of every arm, identically.</text>
 <text x="56" y="848" font-family="Inter, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="9.4" fill="#475569" font-weight="normal" text-anchor="start">Out of scope — designing a new detector architecture, and any claim about measured data. The contribution is the comparison, not a new detector.</text>
