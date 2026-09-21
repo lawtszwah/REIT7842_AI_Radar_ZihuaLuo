@@ -1,10 +1,16 @@
 # Generalisation probe: parameter regimes deliberately outside the training grid.
 # Answers research question 2 -- where do any gains actually occur?
+#
+# This file holds the authoritative joint-shift grid; it is NOT duplicated into
+# configs/protocol/full.yaml, which defines the other reportable splits. Both files
+# are covered by the protocol freeze. Referenced from README.md and
+# docs/risk_register.md; see docs/simulator_model.md section 7.
 simulator: prdsim
 test:
   n_maps: 2000
   n_range: 128
   n_doppler: 128
+  n_targets: [1, 3]           # matches every other split; without it the default is (1, 1)
   snr_db: [-6.0, -1.0]        # weaker than anything seen in training
   noise_power: [4.0, 8.0]     # higher noise floor than training
   clutter_patches: [6, 12]    # heavier clutter than training
