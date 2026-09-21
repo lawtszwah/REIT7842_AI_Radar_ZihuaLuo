@@ -91,6 +91,43 @@ protocol:
   # section 8.
   gate3_permitted_repeats: 1
 
+# Seeds and numerical settings for the analytical simulator-validation run.
+# These are deliberately separate from `protocol.seed_streams`: the validation
+# run is evidence about the simulator, not one of the benchmark data splits.
+# The second root is consumed only when Gate 3's first run fails at exactly one
+# design point. Reordering stream names changes every derived seed and therefore
+# requires a new simulator-validation record.
+simulator_validation:
+  root_seeds: [20261031, 20261032]
+  seed_streams:
+    - contract
+    - component_switches
+    - gate1_noise
+    - gate2_targets
+    - gate3_noise
+    - analysis_bootstrap
+  acceptance_z: 4.0
+  map_size: 128
+  gate1:
+    noise_powers: [0.25, 1.0, 4.0, 8.0]
+    n_maps: 64
+    quantiles: [0.5, 0.9, 0.99, 0.999]
+  gate2:
+    offsets: [0.0, 0.125, 0.25, 0.375, 0.5]
+    n_maps: 4096
+    chunk_size: 512
+    snr_db: 10.0
+    noise_power: 1.0
+    metadata_tolerance_db: 1.0e-5
+  gate3:
+    train: 4
+    guard: 2
+    chunk_size: 124
+    noise_power: 1.0
+    min_eligible_cells: 10000000
+    bootstrap_resamples: 10000
+    interval_percentiles: [0.5, 99.5]
+
 detectors:
   - {key: ca_cfar,   kind: ca_cfar}
   - {key: os_cfar,   kind: os_cfar}

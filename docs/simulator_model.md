@@ -80,7 +80,7 @@ $$
 
 `noise_power` is exactly $\sigma^2$, the mean power of a noise-only cell. Complex white
 Gaussian receiver noise followed by square-law detection gives the exponential cell-power
-PDF in radar detection theory [1, Sec. 6.5.2, eq. (6.129), pp. 394–395]. It is also the
+PDF in radar detection theory [1, Sec. 6.5.2, Eq. (6.129), pp. 394–395]. It is also the
 assumption under which the CA-CFAR multiplier
 
 $$
@@ -89,7 +89,7 @@ $$
 
 achieves its design false-alarm probability when the cell under test and the
 $N_\mathrm{tr}$ training cells are independent and identically distributed
-[1, Sec. 6.5.3, eq. (6.140), p. 397].
+[1, Sec. 6.5.3, Eq. (6.140), p. 397].
 This is why the noise distribution and independence are validation gates rather than
 cosmetic implementation details.
 
@@ -350,6 +350,19 @@ a different purpose.
 All gates are run on the implemented `prdsim`, recorded with its version and config, and
 must pass before its output is reportable. Noise-only and single-target validation disable
 the ridge and clutter explicitly.
+
+The numerical settings and validation seed tree are frozen under
+`simulator_validation` in `configs/protocol/full.yaml`. Validation does not consume a
+benchmark split seed. Its first root is 20261031; 20261032 is the only permitted Gate 3
+repeat root. The frozen validation child streams are `contract`, `component_switches`,
+`gate1_noise`, `gate2_targets`, `gate3_noise`, and `analysis_bootstrap`, in that order.
+Cases and chunks use deterministic grandchildren and the validation record stores each
+spawn key and materialised simulator seed.
+
+The release validation command supplies
+`--prdsim-validation-report experiments/<run-id>/prdsim-gate3.json` to pytest. Without
+that option the report writer uses pytest's temporary directory, which lets CI verify the
+schema without modifying the working tree.
 
 ### Gate 1 — noise distribution and independence
 

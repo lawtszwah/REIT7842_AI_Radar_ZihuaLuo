@@ -22,11 +22,12 @@ config + seed  ──▶  dataset            (regenerated, never stored)
 
 ## Seed discipline
 
-* Training data, test data and model initialisation draw from separate, derived seeds
-  (`seed`, `1000 + seed`, and the detector's own `seed`), so a "different seed" changes
-  data *and* initialisation together — which is what the reported standard deviation
-  should cover.
-* Validation data for hyperparameter search uses `5000 + seed`, disjoint from both.
+* Training, validation, calibration, test, analysis-bootstrap and model-initialisation
+  streams are named children spawned from each run's recorded root seed. Their frozen
+  order is declared in `configs/protocol/full.yaml`; integer offsets are not used.
+* Analytical simulator validation has its own two predeclared roots and named child
+  streams under `simulator_validation`. The second root is reserved for Gate 3's single
+  permitted repeat and is never selected after inspecting results.
 * `n_seeds: 5` for reported results; repeated-run standard deviations accompany every number.
 
 ## Re-running everything

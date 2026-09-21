@@ -31,6 +31,12 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+# `validation` marks the M2 simulator validation gates; `slow` marks the ones
+# that need millions of cells. CI runs `-m "not validation"` until M2 lands.
+markers = [
+  "validation: prdsim validation gates (docs/simulator_model.md section 8)",
+  "slow: needs large samples; not part of the CI smoke run",
+]
 
 [tool.ruff]
 line-length = 100

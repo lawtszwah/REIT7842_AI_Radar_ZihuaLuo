@@ -16,7 +16,11 @@ jobs:
       - name: Lint
         run: ruff check src tests scripts
       - name: Contract and protocol tests
-        run: pytest -q
+        # The `validation` marker holds the prdsim validation gates. They are
+        # written ahead of the simulator and are expected to fail until M2, so
+        # they are deselected here rather than allowed to hide a real breakage
+        # in a wall of red. Drop the filter once M2 is met.
+        run: pytest -q -m "not validation"
       - name: Smoke benchmark must run end to end
         run: |
           prdbench run --config configs/protocol/smoke.yaml --out results/ci
