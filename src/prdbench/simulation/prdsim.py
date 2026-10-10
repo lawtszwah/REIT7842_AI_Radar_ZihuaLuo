@@ -1,4 +1,4 @@
-"""Noise, point targets and residual ridge: docs/simulator_model.md, sections 3, 4 and 5."""
+"""Coherent noise, targets, ridge and clutter: docs/simulator_model.md, sections 3–6."""
 
 from __future__ import annotations
 
@@ -70,14 +70,12 @@ def _position(
 
 
 class PrdSim:
-    """Complex receiver noise with coherently summed targets and residual ridge."""
+    """Coherent RD signal model from docs/simulator_model.md, sections 3–6."""
 
     name = "prdsim"
-    version = "0.3.0"
+    version = "0.4.0"
 
     def generate(self, config: SimConfig) -> SimBatch:
-        if config.clutter_enabled:
-            raise NotImplementedError("prdsim 0.3.0: clutter not implemented yet")
         for name in ("ridge_width_bins", "ridge_range_decay"):
             value = getattr(config, name)
             if not (np.isfinite(value) and value > 0):
@@ -97,6 +95,28 @@ class PrdSim:
         snr_bounds = _bounds(config.snr_db, "snr_db")
         lo, hi = _bounds(config.noise_power, "noise_power")
         ridge_bounds = _bounds(config.clutter_ridge_db, "clutter_ridge_db")
+        clutter_level_bounds = _bounds(config.clutter_level_db, "clutter_level_db")
+        clutter_width_bounds = _bounds(config.clutter_width_bins, "clutter_width_bins")
+        if clutter_width_bounds[0] <= 0:
+            raise ValueError("clutter_width_bins must be greater than zero")
+        beta = config.clutter_speckle_fraction
+        if not (np.isfinite(beta) and 0 <= beta <= 1):
+            raise ValueError("clutter_speckle_fraction must be finite and within [0, 1]")
+        patch_lo, patch_hi = config.clutter_patches
+        if not (
+            isinstance(patch_lo, (int, np.integer)) and isinstance(patch_hi, (int, np.integer))
+            and 0 <= patch_lo <= patch_hi
+        ):
+            raise ValueError("clutter_patches must have non-negative, ordered integer bounds")
+        # Default centres cover the closed interval of cell indices, not [0, n].
+        clutter_range_bounds = _bounds(
+            config.clutter_centre_range_bin if config.clutter_centre_range_bin is not None
+            else (0.0, config.n_range - 1.0), "clutter_centre_range_bin",
+        )
+        clutter_doppler_bounds = _bounds(
+            config.clutter_centre_doppler_bin if config.clutter_centre_doppler_bin is not None
+            else (0.0, config.n_doppler - 1.0), "clutter_centre_doppler_bin",
+        )
         if lo < 0:
             raise ValueError("noise_power must be non-negative")
         pinned = (
@@ -116,6 +136,7 @@ class PrdSim:
             )
             ridge_profile = range_profile[:, None] * doppler_profile[None, :]
         all_targets: list[list[Target]] = []
+        all_clutter: list[list[dict]] = []
         derived_seeds = []
         for map_index in range(config.n_maps):
             parameter_key = (map_index, NOISE_PARAMETERS_ID)
@@ -171,8 +192,44 @@ class PrdSim:
                 field += ridge_amplitude * ridge_profile * np.exp(1j * ridge_phase)
                 map_seeds["ridge"] = list(ridge_key)
 
+            patches = []
+            if config.clutter_enabled:
+                clutter_key = (map_index, CLUTTER_ID)
+                clutter_rng = np.random.default_rng(
+                    np.random.SeedSequence(config.seed, spawn_key=clutter_key)
+                )
+                # Fixed order: K, then centre r/d, width r/d, level, phase, speckle Re/Im.
+                n_patches = int(clutter_rng.integers(patch_lo, patch_hi + 1))
+                for _ in range(n_patches):
+                    centre_r = _draw(clutter_rng, clutter_range_bounds)
+                    centre_d = _draw(clutter_rng, clutter_doppler_bounds)
+                    width_r = _draw(clutter_rng, clutter_width_bounds)
+                    width_d = _draw(clutter_rng, clutter_width_bounds)
+                    patch_level_db = _draw(clutter_rng, clutter_level_bounds)
+                    patch_phase = clutter_rng.uniform(0.0, 2.0 * np.pi)
+                    speckle = (
+                        clutter_rng.normal(0.0, np.sqrt(0.5), shape)
+                        + 1j * clutter_rng.normal(0.0, np.sqrt(0.5), shape)
+                    )
+                    range_gaussian = np.exp(-0.5 * ((range_axis - centre_r) / width_r) ** 2)
+                    doppler_gaussian = np.exp(-0.5 * ((doppler_axis - centre_d) / width_d) ** 2)
+                    envelope = range_gaussian[:, None] * doppler_gaussian[None, :]
+                    patch_amplitude = np.sqrt(sigma2 * 10.0 ** (patch_level_db / 10.0))
+                    field += patch_amplitude * envelope * (
+                        np.sqrt(1.0 - beta**2) * np.exp(1j * patch_phase) + beta * speckle
+                    )
+                    patches.append({
+                        "centre_range_bin": centre_r,
+                        "centre_doppler_bin": centre_d,
+                        "width_range_bins": width_r,
+                        "width_doppler_bins": width_d,
+                        "level_db": patch_level_db,
+                    })
+                map_seeds["clutter"] = list(clutter_key)
+
             maps[map_index] = np.abs(field) ** 2
             all_targets.append(targets)
+            all_clutter.append(patches)
             derived_seeds.append(map_seeds)
 
         meta = {
@@ -181,5 +238,6 @@ class PrdSim:
             "config": json.loads(json.dumps(asdict(config))),
             "seed": config.seed,
             "derived_seeds": derived_seeds,
+            "clutter": all_clutter,
         }
         return SimBatch(maps=maps, targets=all_targets, meta=meta)

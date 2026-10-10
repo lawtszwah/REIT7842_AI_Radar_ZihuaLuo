@@ -52,6 +52,11 @@ class SimConfig:
     clutter_enabled: bool = True
     ridge_width_bins: float = 1.1
     ridge_range_decay: float = 0.35
+    clutter_level_db: float | tuple[float, float] | list[float] = (4.0, 11.0)
+    clutter_width_bins: float | tuple[float, float] | list[float] = (1.5, 4.0)
+    clutter_speckle_fraction: float = 0.35
+    clutter_centre_range_bin: float | tuple[float, float] | list[float] | None = None
+    clutter_centre_doppler_bin: float | tuple[float, float] | list[float] | None = None
 
 
 @dataclass

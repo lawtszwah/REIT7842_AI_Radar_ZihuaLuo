@@ -2,7 +2,6 @@
 the validated simulator from M2 onwards."""
 
 import numpy as np
-import pytest
 
 from prdbench.simulation import SimConfig, get_simulator
 from prdbench.simulation.interface import RDMapSimulator, Target
@@ -29,18 +28,12 @@ def test_seed_reproducibility():
     assert np.array_equal(a.maps, b.maps)
 
 
-def test_prdsim_refuses_unimplemented_components():
-    """`full.yaml` names the validated simulator, so it must fail loudly until M2."""
+def test_prdsim_generates_with_every_component_enabled():
+    """Defaults enable targets, ridge and clutter in the complete signal model."""
     sim = get_simulator("prdsim")
     assert isinstance(sim, RDMapSimulator)
-
-    # The default config requests targets, ridge and clutter.
-    with pytest.raises(NotImplementedError):
-        sim.generate(SimConfig())
-
-    small = dict(n_maps=1, n_range=16, n_doppler=16)
-    for overrides in (
-        dict(n_targets=(0, 0), ridge_enabled=False, clutter_enabled=True),
-    ):
-        with pytest.raises(NotImplementedError):
-            sim.generate(SimConfig(**small, **overrides))
+    batch = sim.generate(SimConfig(n_maps=2, n_range=32, n_doppler=32))
+    assert batch.maps.shape == (2, 32, 32)
+    assert batch.maps.dtype == np.float32
+    assert np.isfinite(batch.maps).all()
+    assert (batch.maps >= 0).all()
