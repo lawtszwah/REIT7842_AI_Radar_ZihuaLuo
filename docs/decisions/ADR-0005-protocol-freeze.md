@@ -59,6 +59,9 @@ which are the frozen settings of `simulator_model.md` Sections 5 and 6. The grid
 - Model selection: Pd on the validation split at `selection_pfa` = 10⁻³, with the
   threshold set from the validation background by the same rule. Selection uses neither
   the calibration split nor any test split.
+- Tuning budget: `protocol.tuning_budget` = 12 trials per detector, identical for the CFAR
+  baselines and the learned arms (RSK-03). `prdbench tune` reads it from the config and
+  refuses a different `--budget`.
 - Every calibration, validation and test split must hold at least 10⁷ eligible background
   cells per run, or the run is invalid.
 - Intervals: 95% percentile bootstrap over whole maps, 10,000 resamples, with one set of
@@ -127,9 +130,11 @@ not discovered later and mistaken for detector behaviour:
 1. **Supervisor confirmation** of the data grid above, of `selection_pfa` = 10⁻³ (distinct
    from the 10⁻⁴ headline), and of the 95% interval level. This is the only M2 exit
    criterion that needs the supervisors.
-2. **Tuning budget is not yet in the config.** It is a CLI flag (`prdbench tune --budget`,
-   default 12). RSK-03, equal budget for CFAR and the networks, depends on it being fixed,
-   so it should become `protocol.tuning_budget` and be frozen with the search spaces.
+2. **Tuning budget value.** The budget is now `protocol.tuning_budget` in the config and
+   cannot be overridden from the command line. The value 12 is carried over from the old
+   CLI default and has not been argued for. With 12 trials, every current search space is
+   subsampled: CA- and GO-CFAR have 20 configurations, OS-CFAR 36, GBDT 27, the CNN 18.
+   Confirm 12, or choose a value with a reason.
 3. **Search spaces.** `search_spaces` covers CA/OS/GO-CFAR, GBDT and the CNN, but not the
    attention arm. Decide whether the attention space is frozen now or added under its own
    ADR in M4.

@@ -41,6 +41,9 @@ class ProtocolConfig:
     quantile_method: str = "higher"
     threshold_comparison: str = "score_gt_threshold"
     selection_pfa: float = 1e-3
+    # Trials per detector in model selection. No default: equal budget across arms
+    # (RSK-03) only holds if the number is fixed in the config, not chosen per call.
+    tuning_budget: int | None = None
     bootstrap_resamples: int = 10_000
     bootstrap_interval_percentiles: tuple[float, float] = (2.5, 97.5)
     gate3_permitted_repeats: int = 1

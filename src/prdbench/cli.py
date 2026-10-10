@@ -29,7 +29,9 @@ def main(argv=None) -> int:
     tune = sub.add_parser("tune", help="equal-budget hyperparameter search")
     tune.add_argument("--config", required=True)
     tune.add_argument("--detector", required=True)
-    tune.add_argument("--budget", type=int, default=12)
+    tune.add_argument("--budget", type=int, default=None,
+                      help="only for configs without protocol.tuning_budget; "
+                           "must match it otherwise")
     tune.add_argument("--out", default=None)
 
     fig = sub.add_parser("report", help="render figures and tables from results.json")

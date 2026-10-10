@@ -28,18 +28,30 @@ def grid(space: dict) -> list[dict]:
             for vals in itertools.product(*(space[k] for k in keys))]
 
 
-def search(spec: dict, kind: str, space: dict, budget: int,
+def search(spec: dict, kind: str, space: dict, budget: int | None = None,
            root_seed: int = 0, out: Path | None = None) -> dict:
     """Rank by validation Pd; ties retain trial order after subsampling.
 
     Calibration and test splits are never generated or consulted here. The
     calibration split remains reserved for thresholds after model selection.
+
+    The trial budget is `protocol.tuning_budget`. An explicit `budget` is accepted
+    only where the config sets none, or where it repeats the configured value: a
+    frozen budget cannot be overridden from the command line.
     """
     if "validation" not in spec:
         raise ValueError("an explicit validation split is required for model selection")
-    if budget < 1:
-        raise ValueError("budget must be positive")
     proto = ProtocolConfig(**spec.get("protocol", {}))
+    configured = proto.tuning_budget
+    if configured is not None and budget is not None and budget != configured:
+        raise ValueError(
+            f"protocol.tuning_budget is {configured}; refusing a budget of {budget}"
+        )
+    budget = configured if configured is not None else budget
+    if budget is None:
+        raise ValueError("set protocol.tuning_budget (or pass budget for an unfrozen config)")
+    if isinstance(budget, bool) or not isinstance(budget, int) or budget < 1:
+        raise ValueError("tuning budget must be a positive integer")
     _validate_score_rule(proto)
     required = {"train_maps", "validation_maps"}
     trainable = REGISTRY[kind].trainable

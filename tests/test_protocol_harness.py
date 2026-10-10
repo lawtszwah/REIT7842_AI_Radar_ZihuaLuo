@@ -523,3 +523,32 @@ def test_invalid_analysis_settings_fail_clearly(field, value, tmp_path):
     spec["protocol"][field] = value
     with pytest.raises(ValueError, match=field):
         run_benchmark(spec, tmp_path)
+
+
+def test_tuning_budget_comes_from_the_config():
+    """RSK-03: equal budget only holds if the frozen config fixes it."""
+    spec = _spec()
+    space = {"train": [2, 3], "guard": [1, 2]}
+    spec["protocol"]["tuning_budget"] = 2
+    assert search(spec, "ca_cfar", space)["budget"] == 2
+    assert search(spec, "ca_cfar", space, budget=2)["n_trials"] == 2
+    with pytest.raises(ValueError, match="tuning_budget is 2"):
+        search(spec, "ca_cfar", space, budget=3)
+
+
+def test_tuning_budget_must_be_set_somewhere():
+    with pytest.raises(ValueError, match="tuning_budget"):
+        search(_spec(), "ca_cfar", {"train": [2], "guard": [1]})
+
+
+@pytest.mark.parametrize("value", [0, -1, 1.5, True])
+def test_tuning_budget_must_be_a_positive_integer(value):
+    spec = _spec()
+    spec["protocol"]["tuning_budget"] = value
+    with pytest.raises(ValueError, match="positive integer"):
+        search(spec, "ca_cfar", {"train": [2], "guard": [1]})
+
+
+def test_full_protocol_freezes_a_tuning_budget():
+    assert isinstance(FULL["protocol"]["tuning_budget"], int)
+    assert FULL["protocol"]["tuning_budget"] >= 1
