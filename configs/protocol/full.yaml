@@ -1,6 +1,8 @@
 # The protocol the thesis results will be reported under.
 # Frozen before the deep models are tuned; changes require an ADR.
 simulator: prdsim         # the validated in-project simulator (M2); `stub` is not reportable
+# Joint-shift grid lives in this repo-root-relative file and is covered by the freeze.
+joint_shift_config: configs/data/shift_test.yaml
 
 train:
   n_maps: 4000
@@ -52,6 +54,7 @@ extended_test:
 
 protocol:
   pfa_points: [1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2]
+  selection_pfa: 1.0e-3  # Rank configurations by validation Pd at this operating point.
   tol_bins: 1.0
   exclude_bins: 3.0
   zero_doppler_guard: 2
@@ -63,6 +66,7 @@ protocol:
   quantile_method: higher
   threshold_comparison: score_gt_threshold
   bootstrap_resamples: 10000
+  bootstrap_interval_percentiles: [2.5, 97.5]  # 95% map-clustered percentile interval.
 
   # Child streams spawned from each run's root seed, in this exact order:
   #   children = numpy.random.SeedSequence(root_seed).spawn(len(seed_streams))
@@ -82,6 +86,7 @@ protocol:
     - calibration_maps
     - analysis_bootstrap
     - model_initialization
+    - tuning_trial_selection
 
   # Gate 3 uses a 99% interval at four design points, so a correct simulator fails
   # a run about 4% of the time. One repeat is permitted, at the next seed, and only

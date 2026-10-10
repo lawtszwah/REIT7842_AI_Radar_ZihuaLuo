@@ -12,15 +12,18 @@ import json
 import platform
 import subprocess
 import time
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
+import yaml
 
 from ..data.generate import build_dataset
 from ..detectors import REGISTRY
 from ..detectors import build as build_detector
-from . import cost, metrics
+from . import bootstrap, cost, metrics
+from .seeds import make_streams, stream_record
 
 
 @dataclass
@@ -37,8 +40,9 @@ class ProtocolConfig:
     calibration_method: str = "empirical_background_quantile"
     quantile_method: str = "higher"
     threshold_comparison: str = "score_gt_threshold"
-    # Recorded protocol settings; bootstrap analysis is reserved for step 6.
+    selection_pfa: float = 1e-3
     bootstrap_resamples: int = 10_000
+    bootstrap_interval_percentiles: tuple[float, float] = (2.5, 97.5)
     gate3_permitted_repeats: int = 1
 
 
@@ -47,7 +51,35 @@ SPLIT_STREAMS = {
     "calibration": "calibration_maps",
     "test_in_distribution": "test_in_distribution_maps",
     "extended_test": "extended_test_maps",
+    "joint_shift": "joint_shift_maps",
 }
+TEST_SPLITS = ("test_in_distribution", "extended_test", "joint_shift")
+
+
+def merge_joint_shift(spec: dict, repo_root: Path | None = None) -> dict:
+    """Resolve joint_shift_config relative to the repo root, before hashing.
+
+    The CLI handles external config reads here; run_benchmark only sees the
+    merged spec. An explicit repo_root also permits standalone tests.
+    """
+    merged = deepcopy(spec)
+    if "joint_shift_config" not in spec:
+        return merged
+    path = Path(spec["joint_shift_config"])
+    if not path.is_absolute():
+        path = (repo_root or Path(__file__).resolve().parents[3]) / path
+    raw = path.read_bytes()
+    shift = yaml.safe_load(raw)
+    if not isinstance(shift, dict) or shift.get("simulator") != spec["simulator"]:
+        raise ValueError("joint_shift_config simulator must equal the protocol simulator")
+    if not isinstance(shift.get("test"), dict):
+        raise ValueError("joint_shift_config must contain a test block")
+    merged["joint_shift"] = shift["test"]
+    merged["joint_shift_source"] = {
+        "path": str(spec["joint_shift_config"]),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
+    return merged
 
 
 def _git_commit() -> str:
@@ -62,40 +94,38 @@ def _validate_spec(spec: dict, proto: ProtocolConfig, test_splits: list[str]) ->
         raise ValueError("calibration split is required")
     if tuple(spec["calibration"].get("n_targets", (1, 1))) != (0, 0):
         raise ValueError("calibration must be target-free: set n_targets to [0, 0]")
-    if not test_splits:
+    if not any(name in test_splits for name in TEST_SPLITS[:2]):
         raise ValueError("at least one of test_in_distribution or extended_test is required")
-    if not proto.seed_streams or not isinstance(proto.seed_streams, (list, tuple)):
-        raise ValueError("protocol.seed_streams is required as an ordered list of names")
-    if any(not isinstance(name, str) for name in proto.seed_streams):
-        raise ValueError("protocol.seed_streams must contain string names")
-    if len(set(proto.seed_streams)) != len(proto.seed_streams):
-        raise ValueError("protocol.seed_streams must contain unique names")
     required = {SPLIT_STREAMS[name] for name in ("train", "calibration", *test_splits)}
+    required.add("analysis_bootstrap")
     if any(REGISTRY[entry["kind"]].trainable for entry in spec["detectors"]):
         required.add("model_initialization")
-    missing = required - set(proto.seed_streams)
-    if missing:
-        raise ValueError(f"protocol.seed_streams missing required names: {sorted(missing)}")
+    make_streams(0, proto.seed_streams, required)
+    _validate_score_rule(proto)
+    percentiles = proto.bootstrap_interval_percentiles
+    if proto.bootstrap_resamples < 1:
+        raise ValueError("protocol.bootstrap_resamples must be positive")
+    if (len(percentiles) != 2 or not all(np.isfinite(percentiles))
+            or not 0 <= percentiles[0] < percentiles[1] <= 100):
+        raise ValueError("protocol.bootstrap_interval_percentiles must be two ordered percentiles")
+    if proto.n_seeds < 1:
+        raise ValueError("n_seeds must be positive")
+    if not proto.pfa_points or any(not 0 < p < 1 for p in proto.pfa_points):
+        raise ValueError("protocol.pfa_points must contain probabilities strictly between 0 and 1")
+
+
+def _validate_score_rule(proto: ProtocolConfig) -> None:
+    """Evaluation and selection share quantiles, comparisons and eligibility."""
     if proto.quantile_method != "higher":
         raise ValueError("protocol.quantile_method must be 'higher'")
     if proto.threshold_comparison != "score_gt_threshold":
         raise ValueError("protocol.threshold_comparison must be 'score_gt_threshold'")
     if proto.calibration_method != "empirical_background_quantile":
         raise ValueError("protocol.calibration_method must be 'empirical_background_quantile'")
-    if proto.n_seeds < 1 or proto.min_eligible_background_cells < 1:
-        raise ValueError("n_seeds and min_eligible_background_cells must be positive")
-    if not proto.pfa_points or any(not 0 < p < 1 for p in proto.pfa_points):
-        raise ValueError("protocol.pfa_points must contain probabilities strictly between 0 and 1")
-
-
-def _stream_record(stream: np.random.SeedSequence, *, model: bool = False) -> dict:
-    # Model initialization uses a native uint32 draw: sklearn's integer random_state
-    # is limited to 32 bits, and this same integer also works with numpy and torch.
-    dtype = np.uint32 if model else np.uint64
-    return {
-        "spawn_key": list(stream.spawn_key),
-        "materialised_seed": int(stream.generate_state(1, dtype=dtype)[0]),
-    }
+    if proto.min_eligible_background_cells < 1:
+        raise ValueError("min_eligible_background_cells must be positive")
+    if not 0 < proto.selection_pfa < 1:
+        raise ValueError("protocol.selection_pfa must be strictly between 0 and 1")
 
 
 def _calibrate_thresholds(cal_bg: np.ndarray, proto: ProtocolConfig) -> dict[str, float]:
@@ -106,9 +136,9 @@ def _calibrate_thresholds(cal_bg: np.ndarray, proto: ProtocolConfig) -> dict[str
     }
 
 
-def _split_scores(detector, dataset, proto: ProtocolConfig, split_name: str):
+def _split_scores(detector, dataset, proto: ProtocolConfig, split_name: str, *, scores=None):
     tgt, bg, snr = metrics.split_scores(
-        detector.score(dataset.maps), dataset.targets,
+        detector.score(dataset.maps) if scores is None else scores, dataset.targets,
         tol=proto.tol_bins, exclude=proto.exclude_bins,
         zero_doppler_guard=proto.zero_doppler_guard,
     )
@@ -139,7 +169,9 @@ def _evaluate_split(tgt, bg, snr, thresholds: dict, proto: ProtocolConfig) -> di
 def run_benchmark(spec: dict, out_dir: Path) -> dict:
     """Fit on train, calibrate on null maps, and evaluate named test splits."""
     proto = ProtocolConfig(**spec.get("protocol", {}))
-    test_splits = [name for name in ("test_in_distribution", "extended_test") if name in spec]
+    test_splits = [name for name in TEST_SPLITS if name in spec]
+    if "joint_shift_config" in spec and "joint_shift_source" not in spec:
+        raise ValueError("joint_shift_config must be merged before run_benchmark")
     _validate_spec(spec, proto, test_splits)
     reporting_split = "test_in_distribution" if "test_in_distribution" in spec else test_splits[0]
     reference_pfa = proto.pfa_points[min(1, len(proto.pfa_points) - 1)]
@@ -163,15 +195,14 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
         "protocol": asdict(proto),
         "detectors": [],
     }
+    if "joint_shift_source" in spec:
+        results["run"]["joint_shift_source"] = deepcopy(spec["joint_shift_source"])
 
     per_seed: dict[str, list[dict]] = {}
     for root in results["run"]["root_seeds"]:
-        streams = dict(zip(
-            proto.seed_streams, np.random.SeedSequence(root).spawn(len(proto.seed_streams)),
-            strict=True,
-        ))
+        streams = make_streams(root, proto.seed_streams)
         map_streams = {
-            SPLIT_STREAMS[name]: _stream_record(streams[SPLIT_STREAMS[name]])
+            SPLIT_STREAMS[name]: stream_record(streams[SPLIT_STREAMS[name]])
             for name in ("train", "calibration", *test_splits)
         }
         datasets = {
@@ -182,15 +213,31 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
             for name in ("train", "calibration", *test_splits)
         }
         train = datasets["train"]
-        results["run"].setdefault("simulator_meta", train.meta)
+        # Configs are recorded for root 0; later roots replace only config.seed
+        # with the split's recorded map seed. Per-map metadata is reproducible.
+        results["run"].setdefault("simulator_meta", {
+            name: {key: dataset.meta[key] for key in ("simulator", "simulator_version", "config")}
+            for name, dataset in datasets.items()
+        })
         results["run"].setdefault("simulator", train.meta["simulator"])
         results["run"].setdefault("simulator_version", train.meta["simulator_version"])
 
+        # Spawn all three children even when some splits are absent: positions are fixed.
+        children = streams["analysis_bootstrap"].spawn(len(TEST_SPLITS))
+        bootstrap_records, indices = {}, {}
+        for name in test_splits:
+            record = stream_record(children[TEST_SPLITS.index(name)])
+            bootstrap_records[f"analysis_bootstrap/{name}"] = record
+            # All detectors share this one int32 matrix for valid paired comparisons.
+            indices[name] = bootstrap.map_indices(
+                record["materialised_seed"], len(datasets[name].maps), proto.bootstrap_resamples,
+            )
+
         for entry in spec["detectors"]:
             kind, params = entry["kind"], dict(entry.get("params", {}))
-            used_streams = dict(map_streams)
+            used_streams = map_streams | bootstrap_records
             if REGISTRY[kind].trainable:
-                model_record = _stream_record(streams["model_initialization"], model=True)
+                model_record = stream_record(streams["model_initialization"], model=True)
                 params["seed"] = model_record["materialised_seed"]
                 used_streams["model_initialization"] = model_record
             det = build_detector(kind, **params)
@@ -199,12 +246,20 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
 
             _, cal_bg, _ = _split_scores(det, datasets["calibration"], proto, "calibration")
             thresholds = _calibrate_thresholds(cal_bg, proto)
-            splits = {
-                name: _evaluate_split(
-                    *_split_scores(det, datasets[name], proto, name), thresholds, proto,
+            splits = {}
+            for name in test_splits:
+                dataset = datasets[name]
+                scores = det.score(dataset.maps)
+                splits[name] = _evaluate_split(
+                    *_split_scores(det, dataset, proto, name, scores=scores), thresholds, proto,
                 )
-                for name in test_splits
-            }
+                counts = metrics.per_map_counts(
+                    scores, dataset.targets, thresholds, tol=proto.tol_bins,
+                    exclude=proto.exclude_bins, zero_doppler_guard=proto.zero_doppler_guard,
+                )
+                splits[name].update(bootstrap.intervals(
+                    counts, indices[name], proto.bootstrap_interval_percentiles,
+                ))
             report = splits[reporting_split]
             rec = {
                 "key": entry.get("key", kind),

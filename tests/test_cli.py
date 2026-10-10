@@ -8,7 +8,9 @@ test ever invoked the CLI. These tests do.
 import json
 
 import pytest
+import yaml
 
+from prdbench import cli
 from prdbench.cli import main
 
 
@@ -81,3 +83,46 @@ def test_run_rejects_removed_group_simulator():
     with pytest.raises(SystemExit) as exc:
         main(["run", "--config", "unused.yaml", "--simulator", "group"])
     assert exc.value.code == 2
+
+
+def test_run_merges_joint_shift_before_dispatch(tmp_path, monkeypatch):
+    shift = tmp_path / "shift.yaml"
+    shift.write_text(yaml.safe_dump({"simulator": "stub", "test": {"n_maps": 4}}))
+    spec = {"simulator": "stub", "joint_shift_config": str(shift), "detectors": []}
+    config = tmp_path / "protocol.yaml"
+    config.write_text(yaml.safe_dump(spec))
+    seen = []
+
+    def capture(merged, out):
+        seen.append((merged, out))
+        return {"protocol": {"pfa_points": [1e-3, 1e-2]}, "detectors": []}
+
+    monkeypatch.setattr(cli, "run_benchmark", capture)
+    out = tmp_path / "results"
+    assert main(["run", "--config", str(config), "--out", str(out)]) == 0
+    assert seen[0][0]["joint_shift"] == {"n_maps": 4}
+    assert seen[0][0]["joint_shift_source"]["path"] == str(shift)
+    assert seen[0][1] == out
+    # An override is checked against the external file's simulator before dispatch.
+    with pytest.raises(ValueError, match="simulator"):
+        main(["run", "--config", str(config), "--simulator", "prdsim"])
+    assert len(seen) == 1
+
+
+def test_tune_passes_whole_spec_and_preserves_flags(tmp_path, monkeypatch, capsys):
+    spec = {"simulator": "stub", "train": {"n_maps": 4}, "validation": {"n_maps": 3},
+            "protocol": {"selection_pfa": 1e-3}, "search_spaces": {"ca_cfar": {"train": [2]}}}
+    config = tmp_path / "protocol.yaml"
+    config.write_text(yaml.safe_dump(spec))
+    seen = []
+
+    def capture(spec, kind, space, budget, out):
+        seen.append((spec, kind, space, budget, out))
+        return {"best": {"params": {"train": 2}, "pd": 0.5}}
+
+    monkeypatch.setattr(cli, "search", capture)
+    out = str(tmp_path / "tuning.json")
+    assert main(["tune", "--config", str(config), "--detector", "ca_cfar",
+                 "--budget", "3", "--out", out]) == 0
+    assert seen == [(spec, "ca_cfar", {"train": [2]}, 3, out)]
+    assert json.loads(capsys.readouterr().out) == {"params": {"train": 2}, "pd": 0.5}

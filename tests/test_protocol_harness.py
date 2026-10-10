@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import struct
+from importlib import import_module
 from pathlib import Path
 
 import numpy as np
@@ -12,13 +13,18 @@ import yaml
 
 from prdbench.data.generate import build_dataset
 from prdbench.detectors import build
-from prdbench.evaluation import metrics
-from prdbench.evaluation.protocol import run_benchmark
+from prdbench.evaluation import metrics, protocol
+from prdbench.evaluation.protocol import merge_joint_shift, run_benchmark
+from prdbench.evaluation.seeds import make_streams, stream_record
+from prdbench.tuning.search import search
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FULL = yaml.safe_load((REPO_ROOT / "configs/protocol/full.yaml").read_text())
 MAP_STREAMS = {
     "train_maps", "calibration_maps", "test_in_distribution_maps", "extended_test_maps",
+}
+BOOTSTRAP_STREAMS = {
+    "analysis_bootstrap/test_in_distribution", "analysis_bootstrap/extended_test",
 }
 
 
@@ -31,6 +37,7 @@ def _spec():
     return {
         "simulator": "stub",
         "train": copy.deepcopy(grid),
+        "validation": copy.deepcopy(grid),
         "calibration": grid | {"n_targets": [0, 0]},
         "test_in_distribution": copy.deepcopy(grid),
         "extended_test": grid | {"snr_db": [2.0, 6.0]},
@@ -39,6 +46,8 @@ def _spec():
             "n_seeds": 2, "latency_repeats": 1, "min_eligible_background_cells": 1000,
             "quantile_method": "higher", "threshold_comparison": "score_gt_threshold",
             "seed_streams": list(FULL["protocol"]["seed_streams"]),
+            "selection_pfa": 1e-3, "bootstrap_resamples": 64,
+            "bootstrap_interval_percentiles": [2.5, 97.5],
         },
         "detectors": [{"kind": "ca_cfar", "params": {"train": 2, "guard": 1}}],
     }
@@ -68,9 +77,12 @@ def test_map_stream_seeds_are_spawned_distinct_and_deterministic(baseline):
     observed = []
     for root, run in enumerate(baseline["detectors"][0]["runs"]):
         assert run["root_seed"] == root
-        assert set(run["streams"]) == MAP_STREAMS
+        assert set(run["streams"]) == MAP_STREAMS | BOOTSTRAP_STREAMS
         for name, record in run["streams"].items():
-            child = np.random.SeedSequence(root).spawn(len(names))[names.index(name)]
+            parent, _, split = name.partition("/")
+            child = np.random.SeedSequence(root).spawn(len(names))[names.index(parent)]
+            if split:
+                child = child.spawn(3)[protocol.TEST_SPLITS.index(split)]
             assert record["spawn_key"] == list(child.spawn_key)
             assert record["materialised_seed"] == int(child.generate_state(1, dtype=np.uint64)[0])
             observed.append(record["materialised_seed"])
@@ -98,7 +110,9 @@ def test_model_seed_is_native_uint32_and_shared_by_trainable_detectors(tmp_path)
             assert record == {"spawn_key": list(child.spawn_key), "materialised_seed": expected}
             assert 0 <= record["materialised_seed"] < 2**32
             assert run["describe"]["params"]["seed"] == expected
-            assert set(run["streams"]) == MAP_STREAMS | {"model_initialization"}
+            assert set(run["streams"]) == MAP_STREAMS | BOOTSTRAP_STREAMS | {
+                "model_initialization",
+            }
     assert model_seeds[0] != model_seeds[1]
 
 
@@ -257,4 +271,255 @@ def test_required_splits_and_streams_are_checked(missing, tmp_path):
         spec["protocol"]["seed_streams"].remove("model_initialization")
         spec["detectors"] = [{"kind": "feat_gbdt"}]
     with pytest.raises(ValueError, match="required|missing"):
+        run_benchmark(spec, tmp_path)
+
+
+@pytest.mark.parametrize("root, expected, model_seed", [
+    (0, [8668861027912758289, 4881901421217228719, 16452687389592421897,
+         13238389300853459902, 16732062099500631801, 14153166575370824094,
+         675977917276771736, 16247558764769518856], 23012616),
+    (1, [8431846347943309920, 4042681867674859579, 1275975541612323131,
+         10440292027562320097, 11724249445994358946, 5892472470897923492,
+         1745718741773654819, 15460960693284752821], 3112422837),
+])
+def test_appending_tuning_stream_preserves_frozen_seeds(root, expected, model_seed):
+    # Captured from the eight-stream protocol before appending the tuning stream.
+    original = ["train_maps", "test_in_distribution_maps", "extended_test_maps",
+                "joint_shift_maps", "validation_maps", "calibration_maps",
+                "analysis_bootstrap", "model_initialization"]
+    for config in (FULL, yaml.safe_load((REPO_ROOT / "configs/protocol/smoke.yaml").read_text())):
+        names = config["protocol"]["seed_streams"]
+        assert names == [*original, "tuning_trial_selection"]
+        streams = make_streams(root, names)
+        assert [stream_record(streams[name])["materialised_seed"]
+                for name in original] == expected
+        assert stream_record(streams["model_initialization"], model=True)[
+            "materialised_seed"
+        ] == model_seed
+        assert config["protocol"]["selection_pfa"] == 1e-3
+        assert config["protocol"]["bootstrap_interval_percentiles"] == [2.5, 97.5]
+
+
+def test_selection_uses_only_validation_and_records_each_trial(tmp_path):
+    spec = _spec()
+    spec["validation"]["snr_db"] = [40.0, 40.0]
+    space = {"train": [2, 3, 4], "guard": [1, 2]}
+    result = search(spec, "ca_cfar", space, budget=3, root_seed=17, out=tmp_path / "tune.json")
+    changed = copy.deepcopy(spec)
+    changed["calibration"]["n_targets"] = [99, 99]
+    changed["test_in_distribution"]["snr_db"] = [-40.0, -40.0]
+    changed["extended_test"]["snr_db"] = [-40.0, -40.0]
+    assert search(changed, "ca_cfar", space, budget=3, root_seed=17) == result
+    changed["validation"]["snr_db"] = [-40.0, -40.0]
+    weaker = search(changed, "ca_cfar", space, budget=3, root_seed=17)
+    assert [r["pd"] for r in weaker["all"]] != [r["pd"] for r in result["all"]]
+    assert result["root_seed"] == 17
+    assert result["selection_pfa"] == 1e-3
+    assert result["n_trials"] == result["budget"] == 3
+    assert set(result["streams"]) == {"train_maps", "validation_maps", "tuning_trial_selection"}
+    assert result["best"] == result["all"][0], "ties use trial order after subsampling"
+    val = build_dataset("stub", spec["validation"],
+                        seed=result["streams"]["validation_maps"]["materialised_seed"])
+    for trial in result["all"]:
+        tgt, bg, _ = metrics.split_scores(build("ca_cfar", **trial["params"]).score(val.maps),
+                                          val.targets)
+        assert trial["threshold"] == float(np.quantile(bg, 0.999, method="higher"))
+        assert trial["pd"] == float((tgt > trial["threshold"]).mean())
+        assert trial["n_targets"] == len(tgt)
+        assert trial["n_background_cells"] == len(bg)
+    assert json.loads((tmp_path / "tune.json").read_text()) == result
+
+
+def test_search_and_benchmark_share_map_and_native_model_seeds(tmp_path):
+    spec = _spec()
+    params = {"max_iter": 2, "max_depth": 2, "neg_per_map": 16, "seed": 999}
+    spec["detectors"] = [{"kind": "feat_gbdt", "params": params}]
+    run = run_benchmark(spec, tmp_path)["detectors"][0]["runs"][1]
+    tuned = search(spec, "feat_gbdt", {key: [v] for key, v in params.items()}, budget=1,
+                   root_seed=1)
+    for name in ("train_maps", "model_initialization"):
+        assert tuned["streams"][name] == run["streams"][name]
+    assert tuned["best"]["params"]["seed"] == run["describe"]["params"]["seed"] < 2**32
+    assert "tuning_trial_selection" not in tuned["streams"], "no unused stream is recorded"
+
+
+@pytest.mark.parametrize("problem", ["missing", "floor", "no_targets"])
+def test_selection_requires_eligible_validation_data(problem):
+    spec = _spec()
+    if problem == "missing":
+        del spec["validation"]
+        message = "explicit validation"
+    elif problem == "floor":
+        spec["validation"]["n_maps"] = 1
+        message = "validation: 407 .*1000"
+    else:
+        spec["validation"]["n_targets"] = [0, 0]
+        message = "eligible targets"
+    with pytest.raises(ValueError, match=message):
+        search(spec, "ca_cfar", {"train": [2], "guard": [1]}, budget=1)
+
+
+def test_selection_uses_strict_comparison_with_tied_scores(monkeypatch):
+    monkeypatch.setattr(import_module("prdbench.tuning.search"), "_split_scores",
+                        lambda *args: (np.array([2.0, 3.0]), np.full(1000, 2.0), None))
+    tuned = search(_spec(), "ca_cfar", {"train": [2], "guard": [1]}, budget=1)
+    assert tuned["best"]["threshold"] == 2.0
+    assert tuned["best"]["pd"] == 0.5
+
+
+def test_joint_shift_merge_hash_thresholds_and_stream(tmp_path):
+    spec = _spec()
+    spec["joint_shift_config"] = "shift.yaml"
+    shift = {"simulator": "stub", "test": spec["extended_test"] | {"snr_db": [-6.0, -1.0]}}
+    file = tmp_path / "shift.yaml"
+    file.write_text(yaml.safe_dump(shift))
+    merged = merge_joint_shift(spec, repo_root=tmp_path)
+    assert "joint_shift" not in spec
+    assert merged["joint_shift"] == shift["test"]
+    assert merged["joint_shift_source"] == {
+        "path": "shift.yaml", "sha256": hashlib.sha256(file.read_bytes()).hexdigest(),
+    }
+    res = run_benchmark(merged, tmp_path / "joint")
+    assert res["run"]["joint_shift_source"] == merged["joint_shift_source"]
+    assert res["run"]["reporting_split"] == "test_in_distribution"
+    for run in res["detectors"][0]["runs"]:
+        streams = make_streams(run["root_seed"], spec["protocol"]["seed_streams"])
+        assert run["streams"]["joint_shift_maps"] == stream_record(streams["joint_shift_maps"])
+        data = build_dataset("stub", shift["test"],
+                             seed=run["streams"]["joint_shift_maps"]["materialised_seed"])
+        tgt, bg, _ = metrics.split_scores(build("ca_cfar", train=2, guard=1).score(data.maps),
+                                          data.targets)
+        for p, tau in run["thresholds"].items():
+            assert run["splits"]["joint_shift"]["pd"][p] == float((tgt > tau).mean())
+            assert run["splits"]["joint_shift"]["pfa_achieved"][p] == float((bg > tau).mean())
+        assert run["pd_at_pfa"] == run["splits"]["test_in_distribution"]["pd"]
+    original = run_benchmark(_spec(), tmp_path / "original")
+    assert _threshold_bytes(res) == _threshold_bytes(original)
+    # Even a byte-only edit must be covered by provenance and the merged spec hash.
+    file.write_text(file.read_text() + "\n# revised source\n")
+    amended = merge_joint_shift(spec, repo_root=tmp_path)
+    assert amended["joint_shift"] == merged["joint_shift"]
+    assert run_benchmark(amended, tmp_path / "changed")["run"]["config_sha256"] != res[
+        "run"
+    ]["config_sha256"]
+    shift["test"]["snr_db"] = [-12.0, -10.0]
+    file.write_text(yaml.safe_dump(shift))
+    changed = run_benchmark(merge_joint_shift(spec, repo_root=tmp_path), tmp_path / "grid_changed")
+    assert changed["run"]["config_sha256"] != res["run"]["config_sha256"]
+    assert _threshold_bytes(changed) == _threshold_bytes(res)
+    shift["simulator"] = "prdsim"
+    file.write_text(yaml.safe_dump(shift))
+    with pytest.raises(ValueError, match="simulator"):
+        merge_joint_shift(spec, repo_root=tmp_path)
+    with pytest.raises(ValueError, match="merged"):
+        run_benchmark(spec, tmp_path / "unmerged")
+
+
+def test_joint_shift_floor_and_reporting_with_extended_only(tmp_path):
+    spec = _spec()
+    spec["joint_shift"] = copy.deepcopy(spec["extended_test"])
+    spec["joint_shift"]["n_maps"] = 1
+    with pytest.raises(ValueError, match="joint_shift: 407 .*1000"):
+        run_benchmark(spec, tmp_path / "floor")
+    spec["joint_shift"]["n_maps"] = 4
+    del spec["test_in_distribution"]
+    results = run_benchmark(spec, tmp_path / "extended")
+    assert results["run"]["reporting_split"] == "extended_test"
+    del spec["extended_test"]
+    with pytest.raises(ValueError, match="at least one"):
+        run_benchmark(spec, tmp_path / "joint_only")
+
+
+def test_joint_shift_path_is_relative_to_repo_root_not_working_directory(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+    merged = merge_joint_shift(FULL)
+    authoritative = REPO_ROOT / "configs/data/shift_test.yaml"
+    assert merged["joint_shift"] == yaml.safe_load(authoritative.read_text())["test"]
+    assert merged["joint_shift_source"]["sha256"] == hashlib.sha256(
+        authoritative.read_bytes(),
+    ).hexdigest()
+
+
+def test_joint_shift_requires_test_block(tmp_path):
+    (tmp_path / "shift.yaml").write_text("simulator: stub\n")
+    with pytest.raises(ValueError, match="test block"):
+        merge_joint_shift(_spec() | {"joint_shift_config": "shift.yaml"}, repo_root=tmp_path)
+
+
+def test_bootstrap_indices_are_paired_and_stable_when_splits_are_absent(monkeypatch, tmp_path):
+    original = protocol.bootstrap.intervals
+    seen = []
+
+    def capture(counts, indices, percentiles):
+        seen.append(indices)
+        return original(counts, indices, percentiles)
+
+    monkeypatch.setattr(protocol.bootstrap, "intervals", capture)
+    spec = _spec()
+    spec["detectors"] = [spec["detectors"][0] | {"key": "first"},
+                         spec["detectors"][0] | {"key": "second"}]
+    res = run_benchmark(spec, tmp_path / "paired")
+    for offset in (0, 4):
+        assert seen[offset] is seen[offset + 2]
+        assert seen[offset + 1] is seen[offset + 3]
+        assert seen[offset].dtype == np.int32
+        assert seen[offset].shape == (64, 4)
+    assert not np.array_equal(seen[0], seen[4])
+    for first, second in zip(res["detectors"][0]["runs"], res["detectors"][1]["runs"], strict=True):
+        assert json.dumps(first["splits"], sort_keys=True) == json.dumps(
+            second["splits"], sort_keys=True,
+        )
+        for record in first["splits"].values():
+            for field in ("pd_interval", "pfa_interval"):
+                for lo, hi in record[field].values():
+                    assert 0 <= lo <= hi <= 1
+    full_indices = seen.copy()
+    seen.clear()
+    spec["joint_shift"] = copy.deepcopy(spec["extended_test"])
+    del spec["test_in_distribution"]
+    shifted = run_benchmark(spec, tmp_path / "absent")
+    for root in range(2):
+        assert np.array_equal(full_indices[root * 4 + 1], seen[root * 4])
+        name = "analysis_bootstrap/extended_test"
+        assert shifted["detectors"][0]["runs"][root]["streams"][name] == res[
+            "detectors"
+        ][0]["runs"][root]["streams"][name]
+        assert shifted["detectors"][0]["runs"][root]["streams"][
+            "analysis_bootstrap/joint_shift"
+        ]["spawn_key"] == [6, 2]
+
+
+def test_simulator_manifest_whitelists_only_split_provenance(monkeypatch, tmp_path):
+    original = protocol.build_dataset
+
+    def with_per_map_metadata(*args, **kwargs):
+        dataset = original(*args, **kwargs)
+        dataset.meta["derived_seeds"] = [{"seed": 123}] * len(dataset.maps)
+        dataset.meta["clutter_records"] = [{"patch": "large metadata"}] * len(dataset.maps)
+        return dataset
+
+    monkeypatch.setattr(protocol, "build_dataset", with_per_map_metadata)
+    spec = _spec()
+    res = run_benchmark(spec, tmp_path)
+    meta = res["run"]["simulator_meta"]
+    assert set(meta) == {"train", "calibration", "test_in_distribution", "extended_test"}
+    for split, record in meta.items():
+        assert set(record) == {"simulator", "simulator_version", "config"}
+        assert record["simulator"] == "stub"
+        assert record["config"]["n_maps"] == spec[split]["n_maps"]
+        stream = f"{split}_maps" if split != "train" else "train_maps"
+        assert record["config"]["seed"] == res["detectors"][0]["runs"][0]["streams"][
+            stream
+        ]["materialised_seed"]
+
+
+@pytest.mark.parametrize("field, value", [
+    ("bootstrap_resamples", 0), ("bootstrap_interval_percentiles", [97.5, 2.5]),
+    ("bootstrap_interval_percentiles", [-1, 97.5]),
+    ("bootstrap_interval_percentiles", [float("nan"), 97.5]), ("selection_pfa", 0),
+])
+def test_invalid_analysis_settings_fail_clearly(field, value, tmp_path):
+    spec = _spec()
+    spec["protocol"][field] = value
+    with pytest.raises(ValueError, match=field):
         run_benchmark(spec, tmp_path)

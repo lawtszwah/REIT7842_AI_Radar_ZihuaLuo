@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from .evaluation.protocol import run_benchmark
+from .evaluation.protocol import merge_joint_shift, run_benchmark
 from .reporting import render
 from .tuning.search import search
 
@@ -42,7 +42,7 @@ def main(argv=None) -> int:
         spec = _load(a.config)
         if a.simulator:
             spec["simulator"] = a.simulator
-        res = run_benchmark(spec, Path(a.out))
+        res = run_benchmark(merge_joint_shift(spec), Path(a.out))
         points = res["protocol"]["pfa_points"]
         reference_pfa = points[min(1, len(points) - 1)]
         for d in res["detectors"]:
@@ -57,8 +57,7 @@ def main(argv=None) -> int:
     if a.cmd == "tune":
         spec = _load(a.config)
         space = spec["search_spaces"][a.detector]
-        res = search(spec["simulator"], spec["train"], a.detector, space,
-                     budget=a.budget, out=a.out)
+        res = search(spec, a.detector, space, budget=a.budget, out=a.out)
         print(json.dumps(res["best"], indent=2))
         return 0
 

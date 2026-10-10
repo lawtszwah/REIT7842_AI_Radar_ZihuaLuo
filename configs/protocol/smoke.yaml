@@ -26,6 +26,7 @@ test_in_distribution:
 
 protocol:
   pfa_points: [1.0e-4, 1.0e-3, 1.0e-2]
+  selection_pfa: 1.0e-3  # Rank configurations by validation Pd at this operating point.
   tol_bins: 1.0
   exclude_bins: 3.0
   zero_doppler_guard: 2
@@ -35,6 +36,7 @@ protocol:
   min_eligible_background_cells: 100000
   quantile_method: higher
   threshold_comparison: score_gt_threshold
+  bootstrap_interval_percentiles: [2.5, 97.5]  # 95% map-clustered percentile interval.
   seed_streams:
     - train_maps
     - test_in_distribution_maps
@@ -44,6 +46,7 @@ protocol:
     - calibration_maps
     - analysis_bootstrap
     - model_initialization
+    - tuning_trial_selection
 
 detectors:
   - {key: ca_cfar,   kind: ca_cfar,   params: {train: 4, guard: 2}}

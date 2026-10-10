@@ -16,8 +16,8 @@ Three questions, and where each is answered in the code:
 
 | Research question | Answered by |
 |---|---|
-| RQ1 — Pd at a fixed Pfa, tuned CFAR vs ML families | `evaluation/protocol.py`, `evaluation/metrics.py::pd_at_pfa` |
-| RQ2 — where gains occur (SNR, range/Doppler, clutter) | `evaluation/metrics.py::pd_by_snr`, `configs/data/shift_test.yaml` |
+| RQ1 — Pd at a fixed Pfa, tuned CFAR vs ML families | `evaluation/protocol.py::_calibrate_thresholds`, `evaluation/metrics.py::pd_at_threshold` |
+| RQ2 — where gains occur (SNR, range/Doppler, clutter) | `evaluation/metrics.py::pd_by_snr_at_threshold`, `configs/data/shift_test.yaml` |
 | RQ3 — accuracy retained under an inference-cost budget | `evaluation/cost.py`, `scripts/make_figures.py` fig. 3 |
 
 ## The one design decision everything rests on
