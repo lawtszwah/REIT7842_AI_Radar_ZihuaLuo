@@ -24,7 +24,7 @@ def main(argv=None) -> int:
     run = sub.add_parser("run", help="run the benchmark protocol")
     run.add_argument("--config", required=True)
     run.add_argument("--out", default="results/latest")
-    run.add_argument("--simulator", default=None, choices=["stub", "group"])
+    run.add_argument("--simulator", default=None, choices=["stub", "prdsim"])
 
     tune = sub.add_parser("tune", help="equal-budget hyperparameter search")
     tune.add_argument("--config", required=True)
@@ -43,9 +43,12 @@ def main(argv=None) -> int:
         if a.simulator:
             spec["simulator"] = a.simulator
         res = run_benchmark(spec, Path(a.out))
+        points = res["protocol"]["pfa_points"]
+        reference_pfa = points[min(1, len(points) - 1)]
         for d in res["detectors"]:
-            pd = d[f"pd@pfa={spec['protocol']['pfa_points'][1]:g}"]
-            print(f"{d['key']:<14} Pd={pd['mean']:.3f}+-{pd['std']:.3f}  "
+            pd = d[f"pd@pfa={reference_pfa:g}"]
+            print(f"{d['key']:<14} Pd[{res['run']['reporting_split']}]="
+                  f"{pd['mean']:.3f}+-{pd['std']:.3f}  "
                   f"{d['latency_s_per_map']['mean']*1e3:7.2f} ms/map  "
                   f"params={d['n_parameters']}")
         print(f"\nwrote {Path(a.out) / 'results.json'}")

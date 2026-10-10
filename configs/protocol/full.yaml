@@ -11,8 +11,7 @@ train:
   noise_power: [0.5, 2.0]
   clutter_patches: [0, 6]
 
-# Disjoint model-selection split. The current search implementation derives this
-# from the training parameter grid; M2 must consume this explicit entry instead.
+# Disjoint model-selection split.
 validation:
   n_maps: 1000
   n_range: 128
@@ -41,9 +40,8 @@ test_in_distribution:
   noise_power: [0.5, 2.0]
   clutter_patches: [0, 6]
 
-# Extended test. Kept under the existing key until protocol.py is updated to
-# consume all named test splits.
-test:
+# Extended test.
+extended_test:
   n_maps: 3000
   n_range: 128
   n_doppler: 128

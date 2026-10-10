@@ -66,9 +66,36 @@ def roc(tgt_scores: np.ndarray, bg_scores: np.ndarray, n_points: int = 200):
 
 
 def pd_at_pfa(tgt_scores: np.ndarray, bg_scores: np.ndarray, pfa: float) -> float:
-    """Probability of detection at a fixed false-alarm rate."""
+    """Select a threshold from the supplied background, then measure Pd.
+
+    Used by tuning until step 6; the harness no longer uses this function for
+    reported numbers, which instead use independent calibration thresholds.
+    """
     thr = np.quantile(bg_scores, 1.0 - pfa)
     return float((tgt_scores >= thr).mean())
+
+
+def pd_at_threshold(tgt_scores: np.ndarray, tau: float) -> float:
+    """Per-target Pd at an externally selected threshold, using strict >."""
+    return float((tgt_scores > tau).mean()) if tgt_scores.size else float("nan")
+
+
+def pfa_at_threshold(bg_scores: np.ndarray, tau: float) -> float:
+    """Per-cell Pfa at an externally selected threshold, using strict >."""
+    return float((bg_scores > tau).mean()) if bg_scores.size else float("nan")
+
+
+def pd_by_snr_at_threshold(tgt_scores: np.ndarray, tgt_snr: np.ndarray,
+                           tau: float, edges: np.ndarray) -> list[dict]:
+    """Stratify Pd using the same externally calibrated threshold in every bin."""
+    out = []
+    for lo, hi in zip(edges[:-1], edges[1:], strict=True):
+        selected = (tgt_snr >= lo) & (tgt_snr < hi)
+        out.append({
+            "snr_lo": float(lo), "snr_hi": float(hi), "n": int(selected.sum()),
+            "pd": pd_at_threshold(tgt_scores[selected], tau),
+        })
+    return out
 
 
 def pd_by_snr(tgt_scores: np.ndarray, tgt_snr: np.ndarray, bg_scores: np.ndarray,

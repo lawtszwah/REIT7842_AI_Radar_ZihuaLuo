@@ -66,3 +66,18 @@ def test_subcommand_help_does_not_crash(cmd):
     with pytest.raises(SystemExit) as exc:
         main([cmd, "--help"])
     assert exc.value.code == 0
+
+
+def test_run_help_lists_current_simulator_choices(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["run", "--help"])
+    assert exc.value.code == 0
+    help_text = capsys.readouterr().out
+    assert "{stub,prdsim}" in help_text
+    assert "group" not in help_text
+
+
+def test_run_rejects_removed_group_simulator():
+    with pytest.raises(SystemExit) as exc:
+        main(["run", "--config", "unused.yaml", "--simulator", "group"])
+    assert exc.value.code == 2

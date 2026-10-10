@@ -1,5 +1,6 @@
 # Fast end-to-end run used in CI and for the design artefact screenshot.
 # Small maps, few seeds -- proves the pipeline, not the science.
+# Smoke results are never reportable.
 simulator: stub
 
 train:
@@ -9,7 +10,14 @@ train:
   snr_db: [2.0, 18.0]
   clutter_patches: [0, 3]
 
-test:
+calibration:
+  n_maps: 100
+  n_range: 64
+  n_doppler: 64
+  n_targets: [0, 0]
+  clutter_patches: [0, 3]
+
+test_in_distribution:
   n_maps: 200
   n_range: 64
   n_doppler: 64
@@ -24,6 +32,18 @@ protocol:
   snr_edges: [0, 4, 8, 12, 18]
   n_seeds: 2
   latency_repeats: 3
+  min_eligible_background_cells: 100000
+  quantile_method: higher
+  threshold_comparison: score_gt_threshold
+  seed_streams:
+    - train_maps
+    - test_in_distribution_maps
+    - extended_test_maps
+    - joint_shift_maps
+    - validation_maps
+    - calibration_maps
+    - analysis_bootstrap
+    - model_initialization
 
 detectors:
   - {key: ca_cfar,   kind: ca_cfar,   params: {train: 4, guard: 2}}
