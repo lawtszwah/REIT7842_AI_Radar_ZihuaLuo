@@ -47,6 +47,8 @@ class SimConfig:
     clutter_patches: tuple[int, int] = (0, 3)
     seed: int = 0
     extra: dict = field(default_factory=dict)
+    ridge_enabled: bool = True
+    clutter_enabled: bool = True
 
 
 @dataclass

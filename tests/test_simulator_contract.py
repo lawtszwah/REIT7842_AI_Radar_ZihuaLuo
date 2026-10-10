@@ -29,7 +29,20 @@ def test_seed_reproducibility():
     assert np.array_equal(a.maps, b.maps)
 
 
-def test_pending_simulator_is_flagged_as_unimplemented():
+def test_prdsim_refuses_unimplemented_components():
     """`full.yaml` names the validated simulator, so it must fail loudly until M2."""
+    sim = get_simulator("prdsim")
+    assert isinstance(sim, RDMapSimulator)
+
+    # The default config requests targets, ridge and clutter.
     with pytest.raises(NotImplementedError):
-        get_simulator("prdsim")
+        sim.generate(SimConfig())
+
+    small = dict(n_maps=1, n_range=16, n_doppler=16)
+    for overrides in (
+        dict(n_targets=(1, 1), ridge_enabled=False, clutter_enabled=False),
+        dict(n_targets=(0, 0), ridge_enabled=True, clutter_enabled=False),
+        dict(n_targets=(0, 0), ridge_enabled=False, clutter_enabled=True),
+    ):
+        with pytest.raises(NotImplementedError):
+            sim.generate(SimConfig(**small, **overrides))
