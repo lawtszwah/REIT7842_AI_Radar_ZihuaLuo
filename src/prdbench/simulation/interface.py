@@ -22,6 +22,7 @@ class Target:
     range_bin: float
     doppler_bin: float
     snr_db: float
+    peak_snr_db: float | None = None
 
 
 @dataclass

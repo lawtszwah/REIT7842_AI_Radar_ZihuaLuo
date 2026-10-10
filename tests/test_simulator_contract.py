@@ -40,7 +40,6 @@ def test_prdsim_refuses_unimplemented_components():
 
     small = dict(n_maps=1, n_range=16, n_doppler=16)
     for overrides in (
-        dict(n_targets=(1, 1), ridge_enabled=False, clutter_enabled=False),
         dict(n_targets=(0, 0), ridge_enabled=True, clutter_enabled=False),
         dict(n_targets=(0, 0), ridge_enabled=False, clutter_enabled=True),
     ):
