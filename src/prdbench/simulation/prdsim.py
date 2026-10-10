@@ -1,4 +1,4 @@
-"""Receiver noise and point targets: docs/simulator_model.md, sections 3 and 4."""
+"""Noise, point targets and residual ridge: docs/simulator_model.md, sections 3, 4 and 5."""
 
 from __future__ import annotations
 
@@ -20,6 +20,20 @@ CLUTTER_ID = 4
 ZERO_DOPPLER_TARGET_GUARD = 3  # +/-2 guard columns plus +/-1 matching tolerance.
 TARGET_EXCLUSION_SEPARATION = 6  # Twice the +/-3 truth-exclusion square.
 MAX_PLACEMENT_ATTEMPTS = 1000
+
+
+def _bounds(
+    value: float | tuple[float, float] | list[float], name: str,
+) -> tuple[float, float]:
+    """Normalise a scalar or pair without drawing or perturbing pinned values."""
+    try:
+        lo, hi = (value, value) if np.isscalar(value) else value
+        lo, hi = float(lo), float(hi)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{name} must be a scalar or a pair of finite bounds") from exc
+    if not (np.isfinite(lo) and np.isfinite(hi) and lo <= hi):
+        raise ValueError(f"{name} must have finite, ordered bounds")
+    return lo, hi
 
 
 def _draw(rng: np.random.Generator, bounds: tuple[float, float]) -> float:
@@ -56,28 +70,35 @@ def _position(
 
 
 class PrdSim:
-    """Complex receiver noise with coherently summed point targets."""
+    """Complex receiver noise with coherently summed targets and residual ridge."""
 
     name = "prdsim"
-    version = "0.2.0"
+    version = "0.3.0"
 
     def generate(self, config: SimConfig) -> SimBatch:
-        if config.ridge_enabled:
-            raise NotImplementedError("prdsim 0.2.0: ridge not implemented yet")
         if config.clutter_enabled:
-            raise NotImplementedError("prdsim 0.2.0: clutter not implemented yet")
+            raise NotImplementedError("prdsim 0.3.0: clutter not implemented yet")
+        for name in ("ridge_width_bins", "ridge_range_decay"):
+            value = getattr(config, name)
+            if not (np.isfinite(value) and value > 0):
+                raise ValueError(f"{name} must be finite and greater than zero")
         target_lo, target_hi = config.n_targets
         if not 0 <= target_lo <= target_hi:
             raise ValueError("n_targets must have non-negative, ordered bounds")
 
-        range_bounds = (
+        range_bounds = _bounds(
             config.range_bin if config.range_bin is not None
-            else (0.1 * config.n_range, 0.9 * config.n_range)
+            else (0.1 * config.n_range, 0.9 * config.n_range), "range_bin",
         )
-        doppler_bounds = (
+        doppler_bounds = _bounds(
             config.doppler_bin if config.doppler_bin is not None
-            else (0.1 * config.n_doppler, 0.9 * config.n_doppler)
+            else (0.1 * config.n_doppler, 0.9 * config.n_doppler), "doppler_bin",
         )
+        snr_bounds = _bounds(config.snr_db, "snr_db")
+        lo, hi = _bounds(config.noise_power, "noise_power")
+        ridge_bounds = _bounds(config.clutter_ridge_db, "clutter_ridge_db")
+        if lo < 0:
+            raise ValueError("noise_power must be non-negative")
         pinned = (
             config.range_bin is not None and config.doppler_bin is not None
             and range_bounds[0] == range_bounds[1] and doppler_bounds[0] == doppler_bounds[1]
@@ -85,17 +106,15 @@ class PrdSim:
         if pinned and target_hi > 1:
             raise ValueError("a pinned position cannot request more than one target")
 
-        lo, hi = (
-            (config.noise_power, config.noise_power)
-            if np.isscalar(config.noise_power)
-            else config.noise_power
-        )
-        if not (np.isfinite(lo) and np.isfinite(hi) and 0 <= lo <= hi):
-            raise ValueError("noise_power must have finite, non-negative, ordered bounds")
-
         maps = np.empty((config.n_maps, config.n_range, config.n_doppler), dtype=np.float32)
         range_axis = np.arange(config.n_range, dtype=np.float64)
         doppler_axis = np.arange(config.n_doppler, dtype=np.float64)
+        if config.ridge_enabled:
+            range_profile = np.exp(-range_axis / (config.ridge_range_decay * config.n_range))
+            doppler_profile = np.exp(
+                -0.5 * ((doppler_axis - config.n_doppler // 2) / config.ridge_width_bins) ** 2
+            )
+            ridge_profile = range_profile[:, None] * doppler_profile[None, :]
         all_targets: list[list[Target]] = []
         derived_seeds = []
         for map_index in range(config.n_maps):
@@ -124,7 +143,7 @@ class PrdSim:
                     target_rng, range_bounds, doppler_bounds, config.n_doppler // 2,
                     targets, pinned,
                 )
-                snr_db = _draw(target_rng, config.snr_db)
+                snr_db = _draw(target_rng, snr_bounds)
                 phase = target_rng.uniform(0.0, 2.0 * np.pi)
                 amplitude = np.sqrt(sigma2 * 10.0 ** (snr_db / 10.0))
                 response = (
@@ -135,15 +154,26 @@ class PrdSim:
                 peak_snr_db = float(snr_db + 20.0 * np.log10(peak_response))
                 targets.append(Target(r, d, snr_db, peak_snr_db))
 
+            map_seeds = {
+                "noise_parameters": list(parameter_key),
+                "noise_field": list(field_key),
+                "targets": list(target_key),
+            }
+            if config.ridge_enabled:
+                ridge_key = (map_index, RIDGE_ID)
+                ridge_rng = np.random.default_rng(
+                    np.random.SeedSequence(config.seed, spawn_key=ridge_key)
+                )
+                # Fixed draw order: ridge level, then one phase shared by the whole map.
+                level_db = _draw(ridge_rng, ridge_bounds)
+                ridge_phase = ridge_rng.uniform(0.0, 2.0 * np.pi)
+                ridge_amplitude = np.sqrt(sigma2 * 10.0 ** (level_db / 10.0))
+                field += ridge_amplitude * ridge_profile * np.exp(1j * ridge_phase)
+                map_seeds["ridge"] = list(ridge_key)
+
             maps[map_index] = np.abs(field) ** 2
             all_targets.append(targets)
-            derived_seeds.append(
-                {
-                    "noise_parameters": list(parameter_key),
-                    "noise_field": list(field_key),
-                    "targets": list(target_key),
-                }
-            )
+            derived_seeds.append(map_seeds)
 
         meta = {
             "simulator": self.name,

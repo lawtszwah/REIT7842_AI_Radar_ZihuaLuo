@@ -40,16 +40,18 @@ class SimConfig:
     n_targets: tuple[int, int] = (1, 1)
     # `None` means "anywhere except a 10% margin at each edge", so a config is
     # valid at any map size; give an explicit pair to pin a range/Doppler regime.
-    range_bin: tuple[float, float] | None = None
-    doppler_bin: tuple[float, float] | None = None
-    snr_db: tuple[float, float] = (-2.0, 14.0)
-    noise_power: tuple[float, float] = (1.0, 1.0)
-    clutter_ridge_db: tuple[float, float] = (18.0, 30.0)
+    range_bin: float | tuple[float, float] | list[float] | None = None
+    doppler_bin: float | tuple[float, float] | list[float] | None = None
+    snr_db: float | tuple[float, float] | list[float] = (-2.0, 14.0)
+    noise_power: float | tuple[float, float] | list[float] = (1.0, 1.0)
+    clutter_ridge_db: float | tuple[float, float] | list[float] = (18.0, 30.0)
     clutter_patches: tuple[int, int] = (0, 3)
     seed: int = 0
     extra: dict = field(default_factory=dict)
     ridge_enabled: bool = True
     clutter_enabled: bool = True
+    ridge_width_bins: float = 1.1
+    ridge_range_decay: float = 0.35
 
 
 @dataclass
