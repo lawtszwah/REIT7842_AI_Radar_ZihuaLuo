@@ -1,8 +1,9 @@
+from .groupgen import GroupGenerator
 from .interface import RDMapSimulator, SimBatch, SimConfig, Target
 from .prdsim import PrdSim
 from .stub import StubSimulator
 
-SIMULATORS = {"stub": StubSimulator, "prdsim": PrdSim}
+SIMULATORS = {"stub": StubSimulator, "prdsim": PrdSim, "groupgen": GroupGenerator}
 
 
 def get_simulator(name: str):

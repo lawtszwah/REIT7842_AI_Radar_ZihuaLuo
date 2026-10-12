@@ -36,6 +36,7 @@ testpaths = ["tests"]
 markers = [
   "validation: prdsim validation gates (docs/simulator_model.md section 8)",
   "slow: needs large samples; not part of the CI smoke run",
+  "matlab: needs MATLAB and the group's generator; skipped where either is absent",
 ]
 
 [tool.ruff]
