@@ -1,56 +1,77 @@
 # The protocol the thesis results will be reported under.
 # Frozen before the deep models are tuned; changes require an ADR.
-simulator: prdsim         # the validated in-project simulator (M2); `stub` is not reportable
+simulator: groupgen       # the research group's generator (ADR-0006); prdsim is a reference only
 # Joint-shift grid lives in this repo-root-relative file and is covered by the freeze.
 joint_shift_config: configs/data/shift_test.yaml
 
+# Grid rationale and the measurements behind it: docs/data_grid.md.
+# Maps are 99 range cells (150 m, delay 1-99 samples) x 81 Doppler cells (-400:10:400 Hz).
+# One scene is one target trajectory giving 10 frames, so n_maps is a multiple of 10 and
+# scenes never straddle splits. snr_db is the generator's own SNR_dB, drawn continuously.
+
 train:
   n_maps: 4000
-  n_range: 128
-  n_doppler: 128
-  n_targets: [1, 3]
-  snr_db: [0.0, 16.0]
-  noise_power: [0.5, 2.0]
-  clutter_patches: [0, 6]
+  n_range: 99
+  n_doppler: 81
+  n_targets: [1, 1]
+  snr_db: [-10.0, 10.0]
+  extra:
+    groupgen: {csr_db: [20.0, 30.0], dnr_db: [40.0, 50.0], speed_kmh: [200.0, 600.0]}
 
-# Disjoint model-selection split.
+# Disjoint model-selection split. 1400 maps keep it above the 10^7-cell floor
+# (7524 eligible cells per map).
 validation:
-  n_maps: 1000
-  n_range: 128
-  n_doppler: 128
-  n_targets: [1, 3]
-  snr_db: [0.0, 16.0]
-  noise_power: [0.5, 2.0]
-  clutter_patches: [0, 6]
+  n_maps: 1400
+  n_range: 99
+  n_doppler: 81
+  n_targets: [1, 1]
+  snr_db: [-10.0, 10.0]
+  extra:
+    groupgen: {csr_db: [20.0, 30.0], dnr_db: [40.0, 50.0], speed_kmh: [200.0, 600.0]}
 
 # Target-free null maps used only to set score thresholds after model selection.
-# After masking, every run must retain at least 10^7 eligible background cells.
+# The generator sets clutter relative to the target (CNR = SNR + CSR), so snr_db here is
+# the reference SNR that fixes each map's clutter level, drawn as in the training split.
 calibration:
-  n_maps: 1000
-  n_range: 128
-  n_doppler: 128
+  n_maps: 1400
+  n_range: 99
+  n_doppler: 81
   n_targets: [0, 0]
-  noise_power: [0.5, 2.0]
-  clutter_patches: [0, 6]
+  snr_db: [-10.0, 10.0]
+  extra:
+    groupgen: {csr_db: [20.0, 30.0], dnr_db: [40.0, 50.0], speed_kmh: [200.0, 600.0]}
 
 test_in_distribution:
   n_maps: 3000
-  n_range: 128
-  n_doppler: 128
-  n_targets: [1, 3]
-  snr_db: [0.0, 16.0]
-  noise_power: [0.5, 2.0]
-  clutter_patches: [0, 6]
+  n_range: 99
+  n_doppler: 81
+  n_targets: [1, 1]
+  snr_db: [-10.0, 10.0]
+  extra:
+    groupgen: {csr_db: [20.0, 30.0], dnr_db: [40.0, 50.0], speed_kmh: [200.0, 600.0]}
 
-# Extended test.
+# Extended test: every swept quantity widened beyond the training grid on both sides.
 extended_test:
   n_maps: 3000
-  n_range: 128
-  n_doppler: 128
-  n_targets: [1, 3]
-  snr_db: [-4.0, 16.0]        # includes SNRs never seen in training
-  noise_power: [0.25, 4.0]    # includes noise levels never seen in training
-  clutter_patches: [0, 10]
+  n_range: 99
+  n_doppler: 81
+  n_targets: [1, 1]
+  snr_db: [-14.0, 14.0]
+  extra:
+    groupgen: {csr_db: [15.0, 35.0], dnr_db: [35.0, 55.0], speed_kmh: [150.0, 700.0]}
+
+# Grid shift (supervisor feedback, 2026-10-12): the map size is not fixed. Detectors
+# trained on 99 x 81 maps are tested on 199 x 121 maps (30 km, +/-600 Hz), with the
+# thresholds calibrated on 99 x 81 maps applied unchanged.
+grid_shift:
+  n_maps: 1000
+  n_range: 199
+  n_doppler: 121
+  n_targets: [1, 1]
+  snr_db: [-10.0, 10.0]
+  extra:
+    groupgen: {csr_db: [20.0, 30.0], dnr_db: [40.0, 50.0], speed_kmh: [200.0, 600.0],
+               gridx: [2, 200], fmap: [-600.0, 10.0, 600.0], position_box_m: 30000.0}
 
 protocol:
   pfa_points: [1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2]
@@ -59,7 +80,7 @@ protocol:
   tol_bins: 1.0
   exclude_bins: 3.0
   zero_doppler_guard: 2
-  snr_edges: [-4, 0, 4, 8, 12, 16]
+  snr_edges: [-14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14]
   n_seeds: 5
   latency_repeats: 10
   min_eligible_background_cells: 10000000
@@ -88,6 +109,7 @@ protocol:
     - analysis_bootstrap
     - model_initialization
     - tuning_trial_selection
+    - grid_shift_maps
 
   # Gate 3 uses a 99% interval at four design points, so a correct simulator fails
   # a run about 4% of the time. One repeat is permitted, at the next seed, and only

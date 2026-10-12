@@ -211,8 +211,12 @@ class GroupGenerator:
                 f"n_range x n_doppler must match the generator grid: "
                 f"{len(gridx)} x {len(fmap)} for gridx {p['gridx']} and fmap {p['fmap']}"
             )
-        if tuple(config.n_targets) != (1, 1):
-            raise ValueError("the group's generator simulates exactly one target per scene")
+        if tuple(config.n_targets) not in {(0, 0), (1, 1)}:
+            raise ValueError(
+                "the group's generator simulates exactly one target per scene; "
+                "n_targets must be (1, 1), or (0, 0) for target-free maps"
+            )
+        target_free = tuple(config.n_targets) == (0, 0)
         frames = int(p["range_size"])
         if config.n_maps % frames:
             raise ValueError(f"n_maps must be a multiple of {frames} frames per scene")
@@ -223,7 +227,13 @@ class GroupGenerator:
             scene = _place(rng, p, fmap, gridx)
             scene.update({
                 "id": i,
-                "snr_db": _draw(rng, config.snr_db),
+                # Target-free maps keep a trajectory (the cores need one) but no target power.
+                "target_free": target_free,
+                "snr_db": None if target_free else _draw(rng, config.snr_db),
+                # The generator sets clutter relative to the target (CNR = SNR + CSR), so a
+                # target-free map draws the SNR a target would have had, from the same range,
+                # to keep the clutter level distributed as in maps with targets.
+                "reference_snr_db": _draw(rng, config.snr_db) if target_free else None,
                 "csr_db": _draw(rng, p["csr_db"]),
                 "dnr_db": _draw(rng, p["dnr_db"]),
                 "seed": int(np.random.SeedSequence(config.seed, spawn_key=(i, MATLAB_STREAM))
@@ -248,37 +258,69 @@ class GroupGenerator:
         cmd = (f"addpath('{MATLAB_DIR}'); prd_groupgen('{job_path}');")
         result = subprocess.run([self.matlab, "-batch", cmd], capture_output=True, text=True)
         if result.returncode != 0:
-            raise RuntimeError(f"MATLAB failed:\n{result.stdout[-2000:]}\n{result.stderr[-2000:]}")
+            raise RuntimeError(
+                f"MATLAB failed:\n{result.stdout[-2000:]}\n{result.stderr[-2000:]}")
+
+    def cache_dir(self) -> Path:
+        return Path(os.environ.get("PRDBENCH_CACHE_DIR", REPO_ROOT / "data" / "groupgen_cache"))
+
+    def scene_key(self, scene: dict) -> str:
+        """Cache key: the complete scene specification, the generator files, the adapter."""
+        blob = json.dumps({"scene": {k: v for k, v in scene.items() if k != "id"},
+                           "generator": generator_fingerprint(self.generator_dir),
+                           "adapter": self.adapter_version}, sort_keys=True)
+        return hashlib.sha256(blob.encode()).hexdigest()
+
+    def _ensure_cached(self, scenes: list[dict]) -> list[Path]:
+        """Generate any scene not yet cached, in one MATLAB batch; return each scene's file.
+
+        A scene is a pure function of its specification and seed, so a cached scene is the
+        scene the generator would produce again; the key includes the generator's files.
+        """
+        cache = self.cache_dir()
+        cache.mkdir(parents=True, exist_ok=True)
+        paths = [cache / f"{self.scene_key(s)}.npz" for s in scenes]
+        missing = [(s, path) for s, path in zip(scenes, paths, strict=True) if not path.exists()]
+        if missing:
+            if not self.available():
+                raise RuntimeError(
+                    f"group generator unavailable: need {self.generator_dir} and MATLAB at "
+                    f"{self.matlab} (set PRDBENCH_GENERATOR_DIR / PRDBENCH_MATLAB)"
+                )
+            tmp = Path(tempfile.mkdtemp(prefix="groupgen_"))
+            try:
+                self._run_matlab([s for s, _ in missing], tmp)
+                for s, path in missing:
+                    d = sio.loadmat(tmp / f"scene_{s['id']:06d}.mat")
+                    partial = path.with_suffix(".partial.npz")
+                    np.savez(partial, power=d["power"].astype(np.float32),
+                             target_position=d["target_position"])
+                    partial.replace(path)
+            finally:
+                shutil.rmtree(tmp, ignore_errors=True)
+        return paths
 
     def generate(self, config: SimConfig) -> SimBatch:
-        if not self.available():
-            raise RuntimeError(
-                f"group generator unavailable: need {self.generator_dir} and MATLAB at "
-                f"{self.matlab} (set PRDBENCH_GENERATOR_DIR / PRDBENCH_MATLAB)"
-            )
         p = self._params(config)
         fmap, gridx = _grids(p)
         scenes = self.plan(config)
-        tmp = Path(tempfile.mkdtemp(prefix="groupgen_"))
-        try:
-            self._run_matlab(scenes, tmp)
-            maps, targets = [], []
-            for scene in scenes:
-                d = sio.loadmat(tmp / f"scene_{scene['id']:06d}.mat")
-                power = d["power"]                       # frames x Doppler x range
-                maps.append(np.transpose(power, (0, 2, 1)).astype(np.float32))
+        maps, targets = [], []
+        for scene, path in zip(scenes, self._ensure_cached(scenes), strict=True):
+            with np.load(path) as d:
+                power = d["power"]                           # frames x Doppler x range
                 pos = d["target_position"]
-                velocity = scene["speed_kmh"] / 3.6 * np.array(
-                    [np.cos(np.radians(scene["heading_deg"])),
-                     np.sin(np.radians(scene["heading_deg"]))])
-                rng_bins = delay_samples(pos, p) - (gridx[0] - 1)
-                dop_bins = (doppler_hz(pos, velocity, p) - fmap[0]) / (fmap[1] - fmap[0])
-                targets.extend(
-                    [Target(range_bin=float(r), doppler_bin=float(f), snr_db=scene["snr_db"])]
-                    for r, f in zip(rng_bins, dop_bins, strict=True)
-                )
-        finally:
-            shutil.rmtree(tmp, ignore_errors=True)
+            maps.append(np.transpose(power, (0, 2, 1)).astype(np.float32))
+            if scene["target_free"]:
+                targets.extend([] for _ in range(power.shape[0]))
+                continue
+            rad = np.radians(scene["heading_deg"])
+            velocity = scene["speed_kmh"] / 3.6 * np.array([np.cos(rad), np.sin(rad)])
+            rng_bins = delay_samples(pos, p) - (gridx[0] - 1)
+            dop_bins = (doppler_hz(pos, velocity, p) - fmap[0]) / (fmap[1] - fmap[0])
+            targets.extend(
+                [Target(range_bin=float(r), doppler_bin=float(f), snr_db=scene["snr_db"])]
+                for r, f in zip(rng_bins, dop_bins, strict=True)
+            )
         meta = {
             "simulator": self.name,
             "simulator_version": self.version,

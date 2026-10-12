@@ -289,7 +289,8 @@ def test_appending_tuning_stream_preserves_frozen_seeds(root, expected, model_se
                 "analysis_bootstrap", "model_initialization"]
     for config in (FULL, yaml.safe_load((REPO_ROOT / "configs/protocol/smoke.yaml").read_text())):
         names = config["protocol"]["seed_streams"]
-        assert names == [*original, "tuning_trial_selection"]
+        # Later streams may only be appended (grid_shift_maps was, on 2026-10-12).
+        assert names[:9] == [*original, "tuning_trial_selection"]
         streams = make_streams(root, names)
         assert [stream_record(streams[name])["materialised_seed"]
                 for name in original] == expected

@@ -47,8 +47,18 @@ for k = 1:numel(scenes)
     cfg.c                = s.c;
     cfg.target_start_idx = s.target_start_idx;
     cfg.range_size       = s.range_size;
-    cfg.P_target         = 10^(s.snr_db / 10);
-    cfg.P_clutter        = 10^((s.snr_db + s.csr_db) / 10);
+    if isfield(s, 'target_free') && s.target_free
+        cfg.P_target     = 0;              % target-free map: trajectory kept, no echo
+    else
+        cfg.P_target     = 10^(s.snr_db / 10);
+    end
+    % CSR is clutter relative to the target, so CNR = SNR + CSR. A target-free map keeps
+    % the clutter level a target at reference_snr_db would have had.
+    if isfield(s, 'target_free') && s.target_free
+        cfg.P_clutter    = 10^((s.reference_snr_db + s.csr_db) / 10);
+    else
+        cfg.P_clutter    = 10^((s.snr_db + s.csr_db) / 10);
+    end
     cfg.P_direct         = 10^(s.dnr_db / 10);
     cfg.P_noise          = 1;
     cfg.clutter_bins     = s.clutter_bins;

@@ -55,8 +55,10 @@ SPLIT_STREAMS = {
     "test_in_distribution": "test_in_distribution_maps",
     "extended_test": "extended_test_maps",
     "joint_shift": "joint_shift_maps",
+    "grid_shift": "grid_shift_maps",
 }
-TEST_SPLITS = ("test_in_distribution", "extended_test", "joint_shift")
+# Order is frozen: bootstrap children are spawned by position. Append only.
+TEST_SPLITS = ("test_in_distribution", "extended_test", "joint_shift", "grid_shift")
 
 
 def merge_joint_shift(spec: dict, repo_root: Path | None = None) -> dict:

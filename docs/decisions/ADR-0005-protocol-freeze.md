@@ -1,7 +1,7 @@
 # ADR-0005 — The evaluation protocol is frozen at M2
 
-**Status:** proposed, awaiting supervisor confirmation of the data grid · **Date:** 2026-10-11 ·
-**Builds on:** ADR-0001, ADR-0003, ADR-0004
+**Status:** proposed, awaiting supervisor confirmation of the data grid · **Date:** 2026-10-11,
+revised 2026-10-12 for the group's generator · **Builds on:** ADR-0001, ADR-0003, ADR-0006
 
 ## Context
 
@@ -13,21 +13,21 @@ freeze, and the rule for changing it afterwards.
 
 Three things had to be true first, and now are:
 
-1. **The simulator is complete and validated.** `prdsim` implements all four components of
-   `docs/simulator_model.md` (receiver noise, point targets, residual zero-Doppler ridge,
-   extended clutter). Gates 1–3 of Section 8 pass, and the ridge and clutter, which no
-   analytic gate covers, have their own tests with tolerances derived from exact per-cell
-   statistics at z = 4 (`tests/test_prdsim_ridge.py`, `tests/test_prdsim_clutter.py`).
+1. **The data source is integrated and its ground truth is calibrated.** The research
+   group's generator is reached through `groupgen` (ADR-0006). Its truth conventions were
+   measured, and a `matlab`-marked test checks on every run that recorded truth is within
+   one cell of the target peak. The in-project `prdsim` passes Gates 1–3 and stays as a
+   reference for testing the evaluation code.
 2. **The harness implements the protocol the proposal describes, not the M1 prototype.**
    Thresholds are calibrated on a target-free split and applied unchanged to every test
    split; seeds are spawned children of a recorded root rather than integer offsets; model
    selection uses its own validation split; the joint-shift grid is read from its own file
    and covered by the config hash; and intervals are map-clustered.
-3. **The data splits are checked.** `scripts/check_splits.py` generated all six splits at
-   all five root seeds (30 splits, 70,000 maps) and ran no detector. Every floored split
-   meets 10^7 eligible background cells with at least 1.57× margin. No target lands in the
-   zero-Doppler exclusion. Every split regenerates bit-identically from config and seed,
-   and all 30 seeds and map hashes are distinct.
+3. **The grid is set from measurements of the generator** (`docs/data_grid.md`): background
+   statistics, the reach of the zero-Doppler ridge, and the mapping from the generator's
+   SNR to effective SNR, which fixes the SNR range against ideal detection theory. *Still
+   to do before the tag:* run `scripts/check_splits.py` on the generator at all five root
+   seeds.
 
 ## Decision
 
@@ -35,17 +35,20 @@ At the tag `m2-protocol-freeze`, the following are fixed.
 
 ### Data
 
-| | Train | Validation | Calibration | In-distribution | Extended | Joint shift |
-|---|---:|---:|---:|---:|---:|---:|
-| Maps | 4000 | 1000 | 1000 | 3000 | 3000 | 2000 |
-| Targets per map | 1–3 | 1–3 | 0 | 1–3 | 1–3 | 1–3 |
-| SNR (dB) | 0–16 | 0–16 | — | 0–16 | −4–16 | −6 to −1 |
-| Noise power | 0.5–2.0 | 0.5–2.0 | 0.5–2.0 | 0.5–2.0 | 0.25–4.0 | 4.0–8.0 |
-| Clutter patches | 0–6 | 0–6 | 0–6 | 0–6 | 0–10 | 6–12 |
+| | Train | Validation | Calibration | In-distribution | Extended | Joint shift | Grid shift |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Maps (scenes) | 4000 (400) | 1400 (140) | 1400 (140) | 3000 (300) | 3000 (300) | 2000 (200) | 1000 (100) |
+| Targets per map | 1 | 1 | 0 | 1 | 1 | 1 | 1 |
+| SNR_dB | −10 to 10 | −10 to 10 | (reference) | −10 to 10 | −14 to 14 | −14 to −4 | −10 to 10 |
+| CSR_dB | 20–30 | 20–30 | 20–30 | 20–30 | 15–35 | 30–40 | 20–30 |
+| DNR_dB | 40–50 | 40–50 | 40–50 | 40–50 | 35–55 | 50–55 | 40–50 |
+| Speed (km/h) | 200–600 | 200–600 | 200–600 | 200–600 | 150–700 | 600–850 | 200–600 |
+| Map (range × Doppler) | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 199 × 121 |
 
-All maps are 128 × 128. Ridge and clutter shape parameters take the `SimConfig` defaults,
-which are the frozen settings of `simulator_model.md` Sections 5 and 6. The grids live in
-`configs/protocol/full.yaml` and `configs/data/shift_test.yaml`; both files are frozen.
+Range cells are 150 m and Doppler cells are 10 Hz (−400:10:400 Hz; ±600 Hz for grid shift).
+One scene is one ten-frame trajectory and never straddles splits. The rationale and the
+measurements are in `docs/data_grid.md`. The grids live in `configs/protocol/full.yaml` and
+`configs/data/shift_test.yaml`; both files are frozen.
 
 ### Metrics and operating points
 
@@ -76,17 +79,19 @@ which are the frozen settings of `simulator_model.md` Sections 5 and 6. The grid
 
 ### Simulator
 
-- `prdsim` is frozen at the version that is current at the tag. The Gate 1–3 records and
-  the split check are re-run at that version and stored with the tag.
-- The signal model is `docs/simulator_model.md` as of the tag, including Section 9 (claims
-  the model does not support).
+- The group's generator, identified by the SHA-256 of its files in the `groupgen` version
+  string, with adapter version 0.1.0 or the version current at the tag. The truth
+  calibration test and the split check are re-run at that version and stored with the tag.
+- `prdsim` and its Gate 1–3 records are frozen alongside it as the reference simulator.
+  It is never a source of reported results.
 
 ### Recorded at freeze
 
 | Item | Value |
 |---|---|
-| Merged config SHA-256 (`full.yaml` + joint shift) | `7193eb3814f6bd6ad6b0c8f1ec9f4a8ce732c2baaf4c15f9effcd699a036e417`, **to be recomputed at the tag** |
-| `shift_test.yaml` SHA-256 | `75cf20eefc4fbd8fbd262edb2ddaef382b7e41ce32c973df2e11c7ba006e3359` |
+| Merged config SHA-256 (`full.yaml` + joint shift) | *at tag* |
+| `shift_test.yaml` SHA-256 | *at tag* |
+| Generator fingerprint | *at tag* (currently `567f5e55df8a…`) |
 | Simulator version | *at tag* |
 | Commit | *at tag* |
 
@@ -104,16 +109,18 @@ which are the frozen settings of `simulator_model.md` Sections 5 and 6. The grid
 These are properties of the frozen construction. They are stated here so that they are
 not discovered later and mistaken for detector behaviour:
 
-- **Target-free calibration** biases achieved test Pfa slightly *above* nominal, identically
-  for every arm, because target sinc sidelobes reach cells beyond the ±3-bin exclusion
-  (`simulator_model.md` Section 7).
-- **Ridge leakage.** At high ridge level and short range, the ridge reaches the first
-  eligible columns at d₀ ± 3. At L = 30 dB and range 0 it is about −2.3 dB relative to
-  noise. Departure from design Pfa there is a benchmark result, not a simulator failure
-  (Section 8).
-- **SNR is signal-to-thermal-noise.** It excludes ridge and clutter, so it overstates
-  detectability inside a clutter patch (Section 4.1). Clutter is recorded per map so that
-  results can be stratified by it.
+- **Target-free calibration** may bias achieved test Pfa slightly *above* nominal,
+  identically for every arm, because energy from the target can reach cells beyond the
+  ±3-cell exclusion. Achieved Pfa is reported on every split, so this stays visible.
+- **The generator's SNR_dB is not post-processing SNR.** On this grid the effective SNR at
+  the target cell is about SNR_dB + 5.6 dB (`docs/data_grid.md`). Results are reported
+  against the generator's SNR_dB, with the mapping stated.
+- **Clutter scales with the target.** The generator sets clutter relative to the target
+  (CNR = SNR + CSR). Calibration maps draw a reference SNR so that their clutter level is
+  distributed as in the test splits.
+- **Placement favours longer ranges.** Start positions are uniform over an area.
+- **Monostatic Doppler.** The generator's Doppler follows 2v·u_Rx/λ while its delay is
+  bistatic (ADR-0006). Truth follows the generator.
 
 ## Change control after the freeze
 
@@ -127,9 +134,9 @@ not discovered later and mistaken for detector behaviour:
 
 ## Open before acceptance
 
-1. **Supervisor confirmation** of the data grid above, of `selection_pfa` = 10⁻³ (distinct
-   from the 10⁻⁴ headline), and of the 95% interval level. This is the only M2 exit
-   criterion that needs the supervisors.
+1. **Supervisor confirmation** of the data grid above, of the 10 Hz Doppler grid, of
+   `selection_pfa` = 10⁻³ (distinct from the 10⁻⁴ headline), and of the 95% interval
+   level. This is the only M2 exit criterion that needs the supervisors.
 2. **Tuning budget value.** The budget is now `protocol.tuning_budget` in the config and
    cannot be overridden from the command line. The value 12 is carried over from the old
    CLI default and has not been argued for. With 12 trials, every current search space is
