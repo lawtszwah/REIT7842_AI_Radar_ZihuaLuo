@@ -33,13 +33,15 @@ FMAP, GRIDX = _grids(DEFAULTS)
 ZERO = len(FMAP) // 2
 GUARD = 2  # protocol.zero_doppler_guard
 SNR_LEVELS = [-25.0, -20.0, -15.0, -10.0, -5.0, 0.0, 5.0]
+DNR_LEVELS = [35.0, 40.0, 45.0, 50.0, 55.0]
 SCENES_PER_LEVEL = 8
 FRAMES = DEFAULTS["range_size"]
 
 
-def config(n_scenes: int, seed: int, snr, n_targets=(1, 1)) -> SimConfig:
+def config(n_scenes: int, seed: int, snr, n_targets=(1, 1), **groupgen) -> SimConfig:
     return SimConfig(n_maps=n_scenes * FRAMES, n_range=len(GRIDX), n_doppler=len(FMAP),
-                     n_targets=n_targets, snr_db=snr, seed=seed)
+                     n_targets=n_targets, snr_db=snr, seed=seed,
+                     extra={"groupgen": groupgen} if groupgen else {})
 
 
 def background(sim) -> dict:
@@ -84,6 +86,38 @@ def snr_mapping(sim, floor: float) -> list[dict]:
     return rows
 
 
+def effective_snr_db(batch) -> float | None:
+    """mean(target cell) / mean(eligible background) - 1, in dB."""
+    eligible = np.abs(np.arange(len(FMAP)) - ZERO) > GUARD
+    floor = np.median(batch.maps[:, :, eligible].astype(np.float64)) / np.log(2)
+    cell = [p[int(round(t.range_bin)), int(round(t.doppler_bin))]
+            for p, (t,) in zip(batch.maps, batch.targets, strict=True)]
+    eff = np.mean(cell) / floor - 1.0
+    return float(10 * np.log10(eff)) if eff > 0 else None
+
+
+def dnr_dependence(sim) -> dict:
+    """The direct path sets the background, so effective SNR should fall ~1 dB per dB of DNR.
+
+    Also checks that with no direct path the target does not appear at all: the
+    surveillance channel is correlated against a reference that holds no transmitter
+    signal.
+    """
+    rows = []
+    for k, dnr in enumerate(DNR_LEVELS):
+        batch = sim.generate(config(6, seed=9200 + k, snr=(0.0, 0.0), dnr_db=[dnr, dnr]))
+        rows.append({"dnr_db": dnr, "snr_db": 0.0, "effective_snr_db": effective_snr_db(batch)})
+    x = np.array([r["dnr_db"] for r in rows])
+    y = np.array([r["effective_snr_db"] for r in rows])
+    slope, intercept = np.polyfit(x, y, 1)
+    no_direct = sim.generate(config(6, seed=9299, snr=(0.0, 0.0), dnr_db=[-300.0, -300.0]))
+    return {"rows": rows, "fit_slope_db_per_db": float(slope),
+            "fit_effective_at_snr0": {"intercept_db": float(intercept),
+                                      "rule": "effective ~= SNR_dB - DNR_dB + offset"},
+            "offset_db": float(np.mean(y + x)),
+            "no_direct_path_effective_snr_db": effective_snr_db(no_direct)}
+
+
 def ideal_pd(snr_db: np.ndarray, pfa: float) -> np.ndarray:
     snr = 10 ** (snr_db / 10)
     t = np.log(1 / pfa)
@@ -94,6 +128,7 @@ def main() -> dict:
     sim = get_simulator("groupgen")
     bg = background(sim)
     mapping = snr_mapping(sim, bg["noise_floor_linear"])
+    dnr = dnr_dependence(sim)
     grid = np.arange(-5.0, 25.01, 0.25)
     theory = {}
     for pfa in (1e-5, 1e-4, 1e-3, 1e-2):
@@ -103,6 +138,7 @@ def main() -> dict:
         }
     report = {"simulator_version": sim.version, "grid": {"fmap": DEFAULTS["fmap"],
               "gridx": DEFAULTS["gridx"]}, "background": bg, "snr_mapping": mapping,
+              "dnr_dependence": dnr,
               "ideal_detector_effective_snr_db": theory}
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n")

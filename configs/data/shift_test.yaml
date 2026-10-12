@@ -11,9 +11,12 @@ test:
   n_range: 99
   n_doppler: 81
   n_targets: [1, 1]
-  snr_db: [-14.0, -4.0]       # weaker than most of training
+  # Effective SNR is about SNR_dB - DNR_dB + 50.5 dB (docs/data_grid.md), so this grid
+  # sits at -4.5 to +10.5 dB effective: the lower half of the detection transition, under
+  # a stronger direct path, stronger clutter and faster targets than any training map.
+  snr_db: [-3.0, 8.0]
   extra:
     groupgen:
-      csr_db: [30.0, 40.0]    # stronger clutter than training
-      dnr_db: [50.0, 55.0]    # stronger direct path than training
-      speed_kmh: [600.0, 850.0]  # faster than training: larger Doppler on average
+      csr_db: [30.0, 40.0]    # stronger clutter than training (20-30)
+      dnr_db: [48.0, 52.0]    # stronger direct path than training (45)
+      speed_kmh: [600.0, 850.0]  # faster than training (200-600): larger Doppler on average

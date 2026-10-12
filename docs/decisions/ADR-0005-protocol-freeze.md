@@ -39,9 +39,9 @@ At the tag `m2-protocol-freeze`, the following are fixed.
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Maps (scenes) | 4000 (400) | 1400 (140) | 1400 (140) | 3000 (300) | 3000 (300) | 2000 (200) | 1000 (100) |
 | Targets per map | 1 | 1 | 0 | 1 | 1 | 1 | 1 |
-| SNR_dB | −10 to 10 | −10 to 10 | (reference) | −10 to 10 | −14 to 14 | −14 to −4 | −10 to 10 |
+| SNR_dB | −10 to 10 | −10 to 10 | (reference) | −10 to 10 | −14 to 14 | −3 to 8 | −10 to 10 |
+| DNR_dB | 45 | 45 | 45 | 45 | 40–50 | 48–52 | 45 |
 | CSR_dB | 20–30 | 20–30 | 20–30 | 20–30 | 15–35 | 30–40 | 20–30 |
-| DNR_dB | 40–50 | 40–50 | 40–50 | 40–50 | 35–55 | 50–55 | 40–50 |
 | Speed (km/h) | 200–600 | 200–600 | 200–600 | 200–600 | 150–700 | 600–850 | 200–600 |
 | Map (range × Doppler) | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 99 × 81 | 199 × 121 |
 
@@ -112,9 +112,10 @@ not discovered later and mistaken for detector behaviour:
 - **Target-free calibration** may bias achieved test Pfa slightly *above* nominal,
   identically for every arm, because energy from the target can reach cells beyond the
   ±3-cell exclusion. Achieved Pfa is reported on every split, so this stays visible.
-- **The generator's SNR_dB is not post-processing SNR.** On this grid the effective SNR at
-  the target cell is about SNR_dB + 5.6 dB (`docs/data_grid.md`). Results are reported
-  against the generator's SNR_dB, with the mapping stated.
+- **The generator's SNR_dB is not what limits detection.** The background is set by the
+  direct path's cross-ambiguity sidelobes, and effective SNR ≈ SNR_dB − DNR_dB + 50.7 dB
+  (`docs/data_grid.md`). DNR is held at 45 dB except in the shift tests; results are
+  reported against SNR_dB, with the mapping stated.
 - **Clutter scales with the target.** The generator sets clutter relative to the target
   (CNR = SNR + CSR). Calibration maps draw a reference SNR so that their clutter level is
   distributed as in the test splits.

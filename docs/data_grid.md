@@ -31,11 +31,25 @@ Measured on 200 target-free maps:
 
 ## 2. SNR: range, step, and the reason for both
 
-`snr_db` is the generator's own `SNR_dB`. Measured at the recorded target cell on the
-10 Hz grid (80 frames per level), the effective SNR, mean(target cell) / mean(background) − 1,
-is about **SNR_dB + 5.6 dB**: −10 → −4.5, −5 → +1.4, 0 → +5.6, +5 → +11.1 dB. Below
-−10 dB the target cell cannot be told from noise with 80 frames, so those levels give no
-estimate. The offset already includes the average straddle loss on this grid.
+`snr_db` is the generator's own `SNR_dB`, the target relative to *thermal* noise. That is
+not what limits detection. The background the detectors see is set by the **direct path**:
+its cross-ambiguity sidelobes raise the whole map by roughly DNR² (about 90 dB at the
+default DNR of 45 dB) and are exponentially distributed, like noise. Measured at the
+recorded target cell (6 scenes per DNR level, SNR_dB = 0), effective SNR falls by
+**1.03 dB per dB of DNR**: 35 → +14.2, 40 → +10.0, 45 → +4.8, 50 → +0.3, 55 → −6.7 dB. So
+
+  **effective SNR ≈ SNR_dB − DNR_dB + 50.7 dB**,
+
+where effective SNR is mean(target cell) / mean(background) − 1. With no direct path at all the
+target falls to about −12 dB effective. A passive radar correlates against the transmitter's
+signal, and without it there is nothing to correlate with. **DNR is therefore held at the
+default 45 dB in every split where SNR is meant to be the only control.** It varies only
+in the extended and joint-shift tests.
+
+At DNR 45 dB, SNR_dB −10 → −4.5, −5 → +1.4, 0 → +5.6, +5 → +11.1 dB (80 frames per level):
+**SNR_dB + 5.6 dB**. Below −10 dB the target cell cannot be told from the background with
+80 frames, so those levels give no estimate. The offset includes the average straddle loss
+on this grid.
 
 **What range separates detectors.** For a non-fluctuating target in exponential noise, an
 ideal single-cell detector has Pd = Q₁(√(2·snr), √(2·ln(1/Pfa))). At the four design points it
@@ -66,18 +80,23 @@ detector is tuned to a lattice of values. Results are reported in 2 dB bands
 
 | Quantity | Train / validation / in-distribution | Extended test | Joint shift |
 |---|---|---|---|
-| SNR_dB | −10 to 10 | −14 to 14 | −14 to −4 |
+| SNR_dB | −10 to 10 | −14 to 14 | −3 to 8 |
+| DNR_dB (direct path re noise) | 45 | 40 to 50 | 48 to 52 |
+| Effective SNR at the target cell | −4.5 to 15.5 | −13 to 25 | −4.3 to 10.7 |
 | CSR_dB (clutter re target) | 20 to 30 | 15 to 35 | 30 to 40 |
-| DNR_dB (direct path re noise) | 40 to 50 | 35 to 55 | 50 to 55 |
 | Speed (km/h) | 200 to 600 | 150 to 700 | 600 to 850 |
 | Heading | uniform | uniform | uniform |
 
-CSR and DNR are centred on the generator's defaults (25 and 45 dB). The generator sets the
+The joint shift is built in effective SNR, not in SNR_dB. A stronger direct path makes every
+target weaker, so the SNR_dB range is raised to keep the joint shift in the lower half of
+the detection transition. If it fell below the transition, every detector would miss and
+the test would say nothing.
+
+CSR is centred on the generator's default (25 dB). The generator sets the
 clutter level relative to the target (CNR = SNR + CSR). Target-free calibration maps
 therefore draw a reference SNR from the same range, so that their clutter level is
-distributed as in maps with targets. Because the ridge is confined to the masked 0 Hz column
-(section 1), CSR and DNR mostly change cells that are not scored. That is a property of
-the generator's processing, and it is worth confirming with the group.
+distributed as in maps with targets. Because the zero-Doppler ridge is confined to the masked 0 Hz column (section 1), CSR mostly
+changes cells that are not scored; DNR, by contrast, changes every cell (above).
 
 **Placement.** Each trajectory's start position is drawn uniformly over a square: ±16 km
 for 99-cell maps, ±30 km for the grid-shift split. A trajectory is redrawn unless every one
@@ -113,6 +132,6 @@ specification and the generator's files, so every scene is generated once.
 
 1. The generator's Doppler follows the monostatic form 2v·u_Rx/λ while its delay is
    bistatic (ADR-0006). Is that intended?
-2. Confirm the meaning of `SNR_dB`: measured here as about 5.6 dB below the effective SNR at
-   the target cell on this grid.
+2. Confirm the meaning of `SNR_dB` (target re thermal noise) and that detection is meant
+   to be limited by direct-path sidelobes: effective SNR ≈ SNR_dB − DNR_dB + 50.7 dB here.
 3. Confirm the 10 Hz Doppler grid in place of the interface script's 1 Hz grid.
