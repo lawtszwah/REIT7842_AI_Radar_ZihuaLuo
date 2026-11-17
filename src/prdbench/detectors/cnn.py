@@ -3,9 +3,17 @@
 Kept small on purpose: the benchmark's third question is what accuracy survives
 an inference-cost constraint, so the deep models start at a size that could
 plausibly run in near real time and are scaled up only if the cost budget allows.
+
+The device is an execution setting, not a hyperparameter: it is never part of a
+search space or of the frozen config, so choosing a GPU changes neither the config
+hash nor the trials. It is resolved from the `device` argument, else the
+`PRDBENCH_DEVICE` environment variable (set by `prdbench --device`), else the CPU,
+and the resolved device is recorded in `describe()`.
 """
 
 from __future__ import annotations
+
+import os
 
 import numpy as np
 import torch
@@ -14,6 +22,31 @@ from torch import nn
 from .base import Detector
 
 _EPS = 1e-12
+DEVICE_ENV = "PRDBENCH_DEVICE"
+
+
+def resolve_device(device: str | None = None) -> torch.device:
+    """`cpu`, `cuda`, `cuda:N`, `mps`, or `auto` (CUDA, then Apple MPS, then CPU).
+
+    An explicit argument wins over the environment; the default is the CPU. Asking
+    for a device that is not available raises instead of silently using the CPU.
+    """
+    name = (device or os.environ.get(DEVICE_ENV) or "cpu").strip().lower()
+    if name == "auto":
+        if torch.cuda.is_available():
+            name = "cuda"
+        elif torch.backends.mps.is_available():
+            name = "mps"
+        else:
+            name = "cpu"
+    dev = torch.device(name)
+    if dev.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError(f"device {name!r} requested but CUDA is not available")
+    if dev.type == "mps" and not torch.backends.mps.is_available():
+        raise RuntimeError(f"device {name!r} requested but Apple MPS is not available")
+    if dev.type not in ("cpu", "cuda", "mps"):
+        raise ValueError(f"unsupported device {name!r}; use cpu, cuda, cuda:N, mps or auto")
+    return dev
 
 
 def _normalise(maps: np.ndarray) -> torch.Tensor:
@@ -45,13 +78,18 @@ class DilatedCNN(Detector):
 
     def __init__(self, width: int = 16, depth: int = 4, epochs: int = 12,
                  lr: float = 3e-3, batch_size: int = 16, pos_weight: float = 200.0,
-                 seed: int = 0, device: str = "cpu"):
+                 seed: int = 0, device: str | None = None):
         super().__init__(width=width, depth=depth, epochs=epochs, lr=lr,
                          batch_size=batch_size, pos_weight=pos_weight, seed=seed)
         self.name = f"CNN(w={width},d={depth})"
         self.epochs, self.lr, self.batch_size = epochs, lr, batch_size
         self.pos_weight, self.seed = pos_weight, seed
-        self.device = torch.device(device)
+        # Not in self.params: tuning records and trial identity stay device-free.
+        self.device = resolve_device(device)
+        if self.device.type == "cuda":
+            # Reproducible convolutions on CUDA, at some cost in speed.
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
         torch.manual_seed(seed)
         self.model = _Net(width, depth).to(self.device)
 
@@ -60,7 +98,8 @@ class DilatedCNN(Detector):
         x = _normalise(maps)
         y = torch.from_numpy(labels.astype(np.float32)).unsqueeze(1)
         opt = torch.optim.Adam(self.model.parameters(), lr=self.lr)
-        lossf = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(self.pos_weight))
+        lossf = nn.BCEWithLogitsLoss(
+            pos_weight=torch.tensor(self.pos_weight, device=self.device))
         n = len(x)
         g = torch.Generator().manual_seed(self.seed)
         self.model.train()
@@ -87,3 +126,8 @@ class DilatedCNN(Detector):
 
     def n_parameters(self) -> int:
         return sum(p.numel() for p in self.model.parameters())
+
+    def describe(self) -> dict:
+        # Latency in results.json is measured on this device: CPU and GPU numbers are
+        # reported separately, never mixed (RSK-06).
+        return super().describe() | {"device": str(self.device)}
