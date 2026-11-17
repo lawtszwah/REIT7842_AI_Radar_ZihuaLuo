@@ -80,7 +80,10 @@ grid_shift:
 protocol:
   pfa_points: [1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2]
   selection_pfa: 1.0e-3  # Rank configurations by validation Pd at this operating point.
-  tuning_budget: 12      # Trials per detector, identical for CFAR and learned arms (RSK-03).
+  # Trials per detector, identical for CFAR and learned arms (RSK-03). 36 is the size of
+  # the largest search space (OS-CFAR), so every space below is searched exhaustively and
+  # no arm's result depends on which trials a subsample happened to draw (ADR-0005).
+  tuning_budget: 36
   tol_bins: 1.0
   exclude_bins: 3.0
   zero_doppler_guard: 2

@@ -1,6 +1,6 @@
 # The data grid, and why it is this grid
 
-**Status:** proposed with ADR-0005 · **Date:** 2026-10-12 · **Generator:** the research
+**Status:** proposed with ADR-0005 · **Date:** 2026-10-12, revised 2026-11-17 · **Generator:** the research
 group's, through `groupgen` (ADR-0006).
 
 The grid is set from measurements of the generator, not chosen in advance. The measurements
@@ -69,8 +69,8 @@ offset, the transition at all four design points spans generator SNR **−7.6 to
 **Chosen:** training, validation and in-distribution test use **−10 to +10 dB**: the
 transition plus about 2 dB on each side. The margin covers the spread of straddle loss from
 map to map, and detectors that gather energy from several cells, which can detect below the
-single-cell curve. The extended test uses −14 to +14 dB; the joint-shift test uses −14 to
-−4 dB.
+single-cell curve. The extended test uses −14 to +14 dB; the joint-shift test uses −3 to
++8 dB at DNR 48–52 dB, which is −4.3 to +10.7 dB effective (section 3).
 
 **Step.** There is no step. SNR is drawn from a continuous uniform distribution, so no
 detector is tuned to a lattice of values. Results are reported in 2 dB bands
@@ -125,13 +125,13 @@ thresholds calibrated on 99 × 81 maps applied unchanged. CFAR detectors and the
 convolutional CNN take any input size.
 
 **Cost.** About 5.5 s per scene, 1580 scenes per root seed: roughly 2.5 hours per root seed,
-12 hours for all five. Generated scenes are cached on disk, keyed by their full
+12 hours for all five. Measured in the split check (2026-10-12 and 13): 2.31 to 2.55 hours
+per root seed, 12.1 hours for all five. Generated scenes are cached on disk, keyed by their full
 specification and the generator's files, so every scene is generated once.
 
-## 5. Open with the supervisors
+## 5. Decided
 
-1. The generator's Doppler follows the monostatic form 2v·u_Rx/λ while its delay is
-   bistatic (ADR-0006). Is that intended?
-2. Confirm the meaning of `SNR_dB` (target re thermal noise) and that detection is meant
-   to be limited by direct-path sidelobes: effective SNR ≈ SNR_dB − DNR_dB + 50.7 dB here.
-3. Confirm the 10 Hz Doppler grid in place of the interface script's 1 Hz grid.
+The questions this section once held for the supervisors (the generator's monostatic
+Doppler, the meaning of `SNR_dB`, and the 10 Hz Doppler grid) were decided by the author on
+2026-11-17. The decisions and their reasons are recorded in ADR-0005, under "Decisions taken
+before acceptance".

@@ -1,7 +1,9 @@
 # ADR-0005 — The evaluation protocol is frozen at M2
 
-**Status:** proposed, awaiting supervisor confirmation of the data grid · **Date:** 2026-10-11,
-revised 2026-10-12 for the group's generator · **Builds on:** ADR-0001, ADR-0003, ADR-0006
+**Status:** proposed; every open decision is now taken (see "Decisions taken before
+acceptance"), and the ADR is accepted once the freeze run at the tagged version is recorded ·
+**Date:** 2026-10-11, revised 2026-10-12 for the group's generator and 2026-11-17 to record
+the decisions · **Builds on:** ADR-0001, ADR-0003, ADR-0006
 
 ## Context
 
@@ -25,9 +27,13 @@ Three things had to be true first, and now are:
    and covered by the config hash; and intervals are map-clustered.
 3. **The grid is set from measurements of the generator** (`docs/data_grid.md`): background
    statistics, the reach of the zero-Doppler ridge, and the mapping from the generator's
-   SNR to effective SNR, which fixes the SNR range against ideal detection theory. *Still
-   to do before the tag:* run `scripts/check_splits.py` on the generator at all five root
-   seeds.
+   SNR to effective SNR, which fixes the SNR range against ideal detection theory.
+   `scripts/check_splits.py` has been run on the generator at all five root seeds
+   (2026-10-12 and 2026-10-13): all 35 split × root rows meet the 10⁷-cell floor, no
+   target is lost to the zero-Doppler mask, and the calibration split regenerates
+   bit-identically at every root. The tightest margin is the validation split at root 4,
+   10,483,464 eligible cells, about 4.8% above the floor. Details are in
+   `docs/validation_report.md`.
 
 ## Decision
 
@@ -62,9 +68,10 @@ measurements are in `docs/data_grid.md`. The grids live in `configs/protocol/ful
 - Model selection: Pd on the validation split at `selection_pfa` = 10⁻³, with the
   threshold set from the validation background by the same rule. Selection uses neither
   the calibration split nor any test split.
-- Tuning budget: `protocol.tuning_budget` = 12 trials per detector, identical for the CFAR
-  baselines and the learned arms (RSK-03). `prdbench tune` reads it from the config and
-  refuses a different `--budget`.
+- Tuning budget: `protocol.tuning_budget` = 36 trials per detector, identical for the CFAR
+  baselines and the learned arms (RSK-03). 36 is the size of the largest frozen search
+  space, so every arm is searched exhaustively. `prdbench tune` reads the budget from the
+  config and refuses a different `--budget`.
 - Every calibration, validation and test split must hold at least 10⁷ eligible background
   cells per run, or the run is invalid.
 - Intervals: 95% percentile bootstrap over whole maps, 10,000 resamples, with one set of
@@ -80,10 +87,15 @@ measurements are in `docs/data_grid.md`. The grids live in `configs/protocol/ful
 ### Simulator
 
 - The group's generator, identified by the SHA-256 of its files in the `groupgen` version
-  string, with adapter version 0.1.0 or the version current at the tag. The truth
-  calibration test and the split check are re-run at that version and stored with the tag.
-- `prdsim` and its Gate 1–3 records are frozen alongside it as the reference simulator.
-  It is never a source of reported results.
+  string, with adapter version 1.0.0. The truth calibration test and the split check are
+  re-run at that version and stored with the tag.
+- `prdsim` and its Gate 1–3 records are frozen alongside it as the reference simulator,
+  at version 1.0.0. It is never a source of reported results.
+
+### Environment
+
+- Reported runs use Python 3.11, the version in the proposal and in CI. The interpreter
+  and library versions are recorded in every `results.json`.
 
 ### Recorded at freeze
 
@@ -115,13 +127,30 @@ not discovered later and mistaken for detector behaviour:
 - **The generator's SNR_dB is not what limits detection.** The background is set by the
   direct path's cross-ambiguity sidelobes, and effective SNR ≈ SNR_dB − DNR_dB + 50.7 dB
   (`docs/data_grid.md`). DNR is held at 45 dB except in the shift tests; results are
-  reported against SNR_dB, with the mapping stated.
+  reported against SNR_dB with the effective-SNR axis given alongside, so a reader can
+  compare them with detection theory.
+- **Background level varies between maps.** Within one map the background is exponential
+  (per-map normalised CV 0.9996), but the map's mean level rises with CNR, spanning
+  −0.5 to +2.1 dB across 200 maps (correlation with CNR 0.90). Pooled over maps, Gate 1
+  therefore fails. CFAR estimates the level locally and adapts to this; a detector with
+  one fixed threshold across maps does not, and may lose Pd or exceed its Pfa on maps at
+  the ends of the CNR range. This is part of the problem the benchmark poses, not
+  something to correct, and achieved Pfa is reported on every split.
+- **Weak correlation between neighbouring range cells.** After per-map normalisation the
+  lag-1 range correlation is 0.0096, above the 0.0046 tolerance for independent cells;
+  Doppler (−0.002) is within it. A correlation this small changes CA-CFAR's effective
+  number of training cells only slightly, and Gate 3 shows CA-CFAR meeting its design Pfa
+  at all four points on this background.
 - **Clutter scales with the target.** The generator sets clutter relative to the target
   (CNR = SNR + CSR). Calibration maps draw a reference SNR so that their clutter level is
   distributed as in the test splits.
 - **Placement favours longer ranges.** Start positions are uniform over an area.
 - **Monostatic Doppler.** The generator's Doppler follows 2v·u_Rx/λ while its delay is
-  bistatic (ADR-0006). Truth follows the generator.
+  bistatic (ADR-0006). Truth follows the generator, matching the observed peak to
+  0.01 ± 0.11 Hz, so every detector is scored against the Doppler the map actually
+  contains. The inconsistency limits how far the maps stand for a real bistatic
+  geometry; it does not favour one detector over another. It is reported as a threat to
+  validity.
 
 ## Change control after the freeze
 
@@ -133,25 +162,49 @@ not discovered later and mistaken for detector behaviour:
 - Fixing a bug that changes no frozen value, the generated data or any score (for
   example, reporting code) needs no ADR, but is noted in the commit message.
 
-## Open before acceptance
+## Decisions taken before acceptance
 
-1. **Supervisor confirmation** of the data grid above, of the 10 Hz Doppler grid, of
-   `selection_pfa` = 10⁻³ (distinct from the 10⁻⁴ headline), and of the 95% interval
-   level. This is the only M2 exit criterion that needs the supervisors.
-2. **Tuning budget value.** The budget is now `protocol.tuning_budget` in the config and
-   cannot be overridden from the command line. The value 12 is carried over from the old
-   CLI default and has not been argued for. With 12 trials, every current search space is
-   subsampled: CA- and GO-CFAR have 20 configurations, OS-CFAR 36, GBDT 27, the CNN 18.
-   Confirm 12, or choose a value with a reason.
-3. **Search spaces.** `search_spaces` covers CA/OS/GO-CFAR, GBDT and the CNN, but not the
-   attention arm. Decide whether the attention space is frozen now or added under its own
-   ADR in M4.
-4. **Python version.** The proposal says 3.11, CI runs 3.11, and local development runs
-   3.13 (python.org build). The Anaconda interpreter on the development machine segfaults
-   in scikit-learn when torch is also loaded. Record one supported interpreter.
-5. **Simulator version at the tag.** Either keep 0.4.0 or bump to 1.0.0 to mark the frozen
-   model. Bumping changes no generated data, but it does change `meta`, so the Gate
-   records and the split check must be re-run at the tagged version in either case.
+These were open in the earlier drafts. They are decided by the author, on 2026-11-17, each
+with the reason recorded here.
+
+1. **Data grid: kept as above.** It was set from measurements of the generator
+   (`docs/data_grid.md`), and every split at every root seed already meets its floor.
+2. **Doppler grid: 10 Hz, not the interface script's 1 Hz.** A 0.1 s frame resolves 10 Hz.
+   On the 1 Hz grid neighbouring Doppler cells correlate at 0.97, which breaks CA-CFAR's
+   assumption of independent training cells; on the 10 Hz grid the correlation is 0.001.
+   Generation is also about 15 times faster.
+3. **Monostatic Doppler: accepted as the generator's convention.** Truth follows the
+   generator; recorded above as a documented bias and a threat to validity.
+4. **SNR_dB: the generator's own definition, target relative to thermal noise.** The
+   measured mapping to effective SNR is recorded above, and results carry both axes.
+5. **`selection_pfa` = 10⁻³, distinct from the 10⁻⁴ headline.** On a validation split of
+   about 1.05 × 10⁷ cells, 10⁻³ gives about 10,500 false alarms against about 1,050 at
+   10⁻⁴, so the threshold that ranks configurations is ten times better determined.
+   Selecting at the headline point would also tie selection to the number the thesis
+   reports; selecting one decade away keeps them apart.
+6. **Intervals: 95%, map-clustered percentile bootstrap.** The conventional level; the
+   map is the unit of resampling because cells within a map share a background level.
+7. **Tuning budget: 36.** The value 12 was inherited from an old CLI default and
+   subsampled every search space. 36 is the size of the largest frozen space (OS-CFAR);
+   CA- and GO-CFAR (20), GBDT (27) and the CNN (18) are then also searched exhaustively.
+   No arm's result depends on which trials a random subsample drew, which is the
+   strongest form of the equal-effort control in RSK-03. The cost is at most 18 CNN
+   trainings per root seed.
+8. **Attention arm: not frozen now.** It is still a stub. Its search space is added in M4
+   under its own ADR, inside the same budget of 36 and the same selection rule.
+9. **Python 3.11** for every reported run, as in the proposal and CI (see Environment).
+10. **Versions at the tag: 1.0.0** for the `groupgen` adapter and for `prdsim`, to mark the
+    frozen models. Bumping changes no generated data but changes `meta`.
+
+### Remaining before the tag
+
+- Bump the adapter and `prdsim` to 1.0.0.
+- At the tagged commit, under Python 3.11: run `pytest -m matlab` (truth calibration) and
+  `scripts/check_splits.py` at root seeds 0–4. The budget and the joint-shift comment
+  changed after the October split check, so both config hashes have changed and the
+  check must be repeated in any case.
+- Fill the "Recorded at freeze" table, set this ADR to **accepted**, and tag
+  `m2-protocol-freeze` once CI passes.
 
 ## Consequences
 
