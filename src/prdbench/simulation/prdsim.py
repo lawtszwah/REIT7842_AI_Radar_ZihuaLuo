@@ -73,7 +73,7 @@ class PrdSim:
     """Coherent RD signal model from docs/simulator_model.md, sections 3–6."""
 
     name = "prdsim"
-    version = "0.4.0"
+    version = "1.0.0"
 
     def generate(self, config: SimConfig) -> SimBatch:
         for name in ("ridge_width_bins", "ridge_range_decay"):

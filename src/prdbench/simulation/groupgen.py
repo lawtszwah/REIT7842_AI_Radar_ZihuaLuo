@@ -176,7 +176,7 @@ class GroupGenerator:
     """The research group's generator behind the `RDMapSimulator` protocol."""
 
     name = "groupgen"
-    adapter_version = "0.1.0"
+    adapter_version = "1.0.0"
 
     def __init__(self, generator_dir: str | Path | None = None, matlab: str | None = None):
         self.generator_dir = Path(
