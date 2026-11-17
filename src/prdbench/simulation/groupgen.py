@@ -256,10 +256,17 @@ class GroupGenerator:
         job_path = out_dir / "job.json"
         job_path.write_text(json.dumps(job))
         cmd = (f"addpath('{MATLAB_DIR}'); prd_groupgen('{job_path}');")
-        result = subprocess.run([self.matlab, "-batch", cmd], capture_output=True, text=True)
+        # MATLAB's output goes to a file, not a pipe. MATLAB can start a background
+        # MathWorksServiceHost that inherits its stdout/stderr and outlives it; with
+        # pipes, Python would wait for an end-of-file that never comes (seen
+        # 2026-11-17). With a file, Python waits only for MATLAB itself to exit.
+        log_path = out_dir / "matlab.log"
+        with open(log_path, "w") as log:
+            result = subprocess.run([self.matlab, "-batch", cmd], stdin=subprocess.DEVNULL,
+                                    stdout=log, stderr=subprocess.STDOUT)
         if result.returncode != 0:
-            raise RuntimeError(
-                f"MATLAB failed:\n{result.stdout[-2000:]}\n{result.stderr[-2000:]}")
+            output = log_path.read_text(errors="replace")
+            raise RuntimeError(f"MATLAB failed (exit {result.returncode}):\n{output[-4000:]}")
 
     def cache_dir(self) -> Path:
         return Path(os.environ.get("PRDBENCH_CACHE_DIR", REPO_ROOT / "data" / "groupgen_cache"))
