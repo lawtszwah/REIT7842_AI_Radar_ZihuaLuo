@@ -66,3 +66,27 @@ clutter). A processing core produces one range-Doppler frame per 0.1 s.
   (14,000 maps per root seed) that is roughly two hours per root seed, before any caching.
 * **CI cannot run the generator.** The generator tests skip there; the adapter's planning,
   placement and truth formulas are pure Python and run everywhere.
+
+## Addendum (2026-11-18): scene keys are the same on every platform
+
+Moving the CNN training to the Windows machine (M3) showed that the adapter, as of
+`4dbba52`, did not name scenes the same way on every platform, although the generator
+itself did produce the same bytes: the root-0 calibration split, regenerated on Windows
+from an empty cache, matched the Mac hash `2eed8796…6f1f6844`. Two things differed:
+
+* **Fingerprint order.** `sorted(generator_dir.glob("*"))` compares paths without regard
+  to case on Windows, so the generator files were hashed in another order and the
+  fingerprint became `43f431afc8c9` instead of `567f5e55df8a`. Files are now sorted by
+  their exact names.
+* **Rounding of uniform draws.** NumPy's `Generator.uniform` computes
+  low + (high − low) · u. On the Mac (Apple Silicon) this is one fused multiply-add,
+  rounded once; on x86-64 Windows it is rounded twice, which changes the last bit of some
+  scene parameters and so their cache keys. The adapter now takes u from `rng.random()`,
+  which consumes the stream in the same way, and computes the multiply-add exactly with
+  `fractions.Fraction`, rounding once. This gives the Mac values on every platform.
+
+Fixed in commit `869aec8`. **No frozen data change.** With MATLAB disabled, every split at
+every root seed (7,900 scenes) is read on Windows from the Mac cache by its key, and the
+root-0 train and validation maps match the hashes recorded at the freeze. The adapter
+version stays 1.0.0 and ADR-0005 is unaffected. A test pins a fingerprint and a scene key,
+so that a platform difference would now fail in CI.
