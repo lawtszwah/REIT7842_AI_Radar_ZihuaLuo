@@ -87,11 +87,29 @@ def merge_joint_shift(spec: dict, repo_root: Path | None = None) -> dict:
     return merged
 
 
+def config_sha256(spec: dict) -> str:
+    """The hash recorded with every result: canonical JSON of the merged spec."""
+    return hashlib.sha256(
+        json.dumps(spec, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+
+
 def _git_commit() -> str:
     try:
         return subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     except Exception:
         return "unknown"
+
+
+def _git_dirty() -> bool | None:
+    """True when tracked files differ from the commit, so the commit alone does not
+    reproduce the code that ran."""
+    try:
+        out = subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"],
+                                      text=True)
+    except Exception:
+        return None
+    return bool(out.strip())
 
 
 def _validate_spec(spec: dict, proto: ProtocolConfig, test_splits: list[str]) -> None:
@@ -187,12 +205,11 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
         "run": {
             "started": time.strftime("%Y-%m-%dT%H:%M:%S"),
             "git_commit": _git_commit(),
+            "git_dirty": _git_dirty(),
             "python": platform.python_version(),
             "platform": platform.platform(),
             "numpy": np.__version__,
-            "config_sha256": hashlib.sha256(
-                json.dumps(spec, sort_keys=True, separators=(",", ":")).encode()
-            ).hexdigest(),
+            "config_sha256": config_sha256(spec),
             "root_seeds": list(range(proto.n_seeds)),
             "reporting_split": reporting_split,
         },

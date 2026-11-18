@@ -14,7 +14,7 @@ import yaml
 from prdbench.data.generate import build_dataset
 from prdbench.detectors import build
 from prdbench.evaluation import metrics, protocol
-from prdbench.evaluation.protocol import merge_joint_shift, run_benchmark
+from prdbench.evaluation.protocol import config_sha256, merge_joint_shift, run_benchmark
 from prdbench.evaluation.seeds import make_streams, stream_record
 from prdbench.tuning.search import search
 
@@ -310,7 +310,10 @@ def test_selection_uses_only_validation_and_records_each_trial(tmp_path):
     changed["calibration"]["n_targets"] = [99, 99]
     changed["test_in_distribution"]["snr_db"] = [-40.0, -40.0]
     changed["extended_test"]["snr_db"] = [-40.0, -40.0]
-    assert search(changed, "ca_cfar", space, budget=3, root_seed=17) == result
+    unchanged = search(changed, "ca_cfar", space, budget=3, root_seed=17)
+    assert unchanged["run"]["config_sha256"] != result["run"]["config_sha256"]
+    assert {k: v for k, v in unchanged.items() if k != "run"} == {
+        k: v for k, v in result.items() if k != "run"}
     changed["validation"]["snr_db"] = [-40.0, -40.0]
     weaker = search(changed, "ca_cfar", space, budget=3, root_seed=17)
     assert [r["pd"] for r in weaker["all"]] != [r["pd"] for r in result["all"]]
@@ -329,6 +332,16 @@ def test_selection_uses_only_validation_and_records_each_trial(tmp_path):
         assert trial["n_targets"] == len(tgt)
         assert trial["n_background_cells"] == len(bg)
     assert json.loads((tmp_path / "tune.json").read_text()) == result
+
+
+def test_search_records_what_ties_it_to_the_frozen_protocol():
+    spec = _spec()
+    result = search(spec, "ca_cfar", {"train": [2], "guard": [1]}, budget=1, root_seed=3)
+    run = result["run"]
+    assert run["config_sha256"] == config_sha256(spec)
+    assert run["simulator"] == "stub" and run["simulator_version"]
+    assert run["git_commit"] and run["python"] and run["numpy"] == np.__version__
+    assert run["device"] is None, "CFAR runs on no torch device"
 
 
 def test_search_and_benchmark_share_map_and_native_model_seeds(tmp_path):

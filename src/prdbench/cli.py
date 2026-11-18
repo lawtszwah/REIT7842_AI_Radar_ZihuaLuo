@@ -68,7 +68,8 @@ def main(argv=None) -> int:
         return 0
 
     if a.cmd == "tune":
-        spec = _load(a.config)
+        # Merged as for `run`, so the recorded config hash is the frozen one.
+        spec = merge_joint_shift(_load(a.config))
         space = spec["search_spaces"][a.detector]
         res = search(spec, a.detector, space, budget=a.budget, out=a.out)
         print(json.dumps(res["best"], indent=2))

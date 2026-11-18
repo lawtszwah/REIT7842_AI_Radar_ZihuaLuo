@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import itertools
 import json
+import platform
 from pathlib import Path
 
 import numpy as np
@@ -18,7 +19,14 @@ from ..data.generate import build_dataset
 from ..detectors import REGISTRY
 from ..detectors import build as build_detector
 from ..evaluation import metrics
-from ..evaluation.protocol import ProtocolConfig, _split_scores, _validate_score_rule
+from ..evaluation.protocol import (
+    ProtocolConfig,
+    _git_commit,
+    _git_dirty,
+    _split_scores,
+    _validate_score_rule,
+    config_sha256,
+)
 from ..evaluation.seeds import make_streams, stream_record
 
 
@@ -79,12 +87,13 @@ def search(spec: dict, kind: str, space: dict, budget: int | None = None,
     train = build_dataset(spec["simulator"], spec["train"],
                           seed=used["train_maps"]["materialised_seed"])
 
-    scored = []
+    scored, device = [], None
     for params in trials:
         params = dict(params)
         if trainable:
             params["seed"] = used["model_initialization"]["materialised_seed"]
         det = build_detector(kind, **params)
+        device = det.describe().get("device", device)
         if det.trainable:
             det.fit(train.maps, train.labels)
         tgt, bg, _ = _split_scores(det, val, proto, "validation")
@@ -97,7 +106,17 @@ def search(spec: dict, kind: str, space: dict, budget: int | None = None,
         })
 
     # max returns the first tied entry; all retains the actual trial execution order.
-    result = {"detector": kind, "root_seed": root_seed, "streams": used,
+    # Enough to tie a selection to the frozen protocol: the merged config's hash (the one
+    # ADR-0005 records), the commit, the generator version and where the models ran.
+    provenance = {
+        "git_commit": _git_commit(), "git_dirty": _git_dirty(),
+        "config_sha256": config_sha256(spec),
+        "simulator": train.meta["simulator"],
+        "simulator_version": train.meta["simulator_version"],
+        "python": platform.python_version(), "numpy": np.__version__,
+        "platform": platform.platform(), "device": device,
+    }
+    result = {"detector": kind, "root_seed": root_seed, "run": provenance, "streams": used,
               "selection_pfa": proto.selection_pfa, "budget": budget,
               "n_trials": len(trials), "best": max(scored, key=lambda r: r["pd"]), "all": scored}
     if out:
