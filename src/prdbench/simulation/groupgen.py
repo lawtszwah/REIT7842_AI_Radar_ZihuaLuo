@@ -32,6 +32,7 @@ import shutil
 import subprocess
 import tempfile
 from dataclasses import asdict
+from fractions import Fraction
 from pathlib import Path
 
 import numpy as np
@@ -91,9 +92,15 @@ def _bounds(value) -> tuple[float, float]:
     return lo, hi
 
 
+def _uniform(rng: np.random.Generator, lo: float, hi: float) -> float:
+    # The frozen Mac cache used a fused multiply-add in NumPy's uniform sampler.
+    # Calculate the product and sum exactly so every platform rounds only once.
+    return float(Fraction(hi - lo) * Fraction(rng.random()) + Fraction(lo))
+
+
 def _draw(rng: np.random.Generator, value) -> float:
     lo, hi = _bounds(value)
-    return lo if lo == hi else float(rng.uniform(lo, hi))
+    return lo if lo == hi else _uniform(rng, lo, hi)
 
 
 def delay_samples(pos: np.ndarray, p: dict) -> np.ndarray:
@@ -148,7 +155,7 @@ def _place(rng: np.random.Generator, p: dict, fmap, gridx) -> dict:
     f_lim = fmap[-1] - margin * f_step
     box = p["position_box_m"]
     for _ in range(MAX_PLACEMENT_ATTEMPTS):
-        start = rng.uniform(-box, box, size=2)
+        start = np.array([_uniform(rng, -box, box) for _ in range(2)])
         speed = _draw(rng, p["speed_kmh"])
         heading = _draw(rng, p["heading_deg"])
         rad = np.radians(heading)
@@ -165,7 +172,7 @@ def _place(rng: np.random.Generator, p: dict, fmap, gridx) -> dict:
 def generator_fingerprint(generator_dir: Path) -> str:
     """SHA-256 over the generator's files, so every dataset names the exact code it came from."""
     h = hashlib.sha256()
-    for f in sorted(generator_dir.glob("*")):
+    for f in sorted(generator_dir.glob("*"), key=lambda path: path.name):
         if f.suffix in {".m", ".p"}:
             h.update(f.name.encode())
             h.update(f.read_bytes())

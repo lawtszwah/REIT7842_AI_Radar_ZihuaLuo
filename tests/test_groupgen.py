@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from prdbench.simulation import SimConfig, get_simulator
-from prdbench.simulation.groupgen import DEFAULTS, _grids, delay_samples, doppler_hz
+from prdbench.simulation.groupgen import DEFAULTS, GroupGenerator, _grids, delay_samples, doppler_hz
 
 SIM = get_simulator("groupgen")
 FMAP, GRIDX = _grids(DEFAULTS)
@@ -61,6 +61,18 @@ def test_plan_is_deterministic_and_seeded():
     assert a != c
     assert len(a) == 2
     assert all(0 <= s["seed"] < 2**32 for s in a)
+
+
+def test_scene_key_preserves_frozen_mac_order_and_rounding(tmp_path):
+    (tmp_path / "a.m").write_bytes(b"alpha\n")
+    (tmp_path / "Z.p").write_bytes(b"zeta\n")
+    simulator = GroupGenerator(tmp_path)
+    scene, = simulator.plan(_config(n_maps=FRAMES, snr_db=(0.0, 20.0)))
+
+    assert simulator.version == "1.0.0+gen.5c5060d39f36"
+    assert simulator.scene_key(scene) == (
+        "2d77b4cef4e49147ab7cdd0371b8c6192454d4565c856c09f1666ac10fbff3b8"
+    )
 
 
 def test_every_planned_frame_sits_inside_the_window_and_off_zero_doppler():
