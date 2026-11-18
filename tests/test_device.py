@@ -75,7 +75,7 @@ def test_cli_device_sets_the_environment_for_the_run(tmp_path, monkeypatch):
     config.write_text(yaml.safe_dump({"simulator": "stub", "detectors": []}))
     seen = []
 
-    def capture(spec, out):
+    def capture(spec, out, **kw):
         import os
         seen.append(os.environ.get(DEVICE_ENV))
         return {"protocol": {"pfa_points": [1e-3, 1e-2]}, "detectors": []}

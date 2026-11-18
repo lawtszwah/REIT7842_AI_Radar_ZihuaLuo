@@ -41,6 +41,21 @@ prdbench report --results results/smoke/results.json
 `smoke.yaml` runs in ~2 minutes on a laptop CPU using the **development generator**. It
 exists to prove the pipeline, not to produce findings — see the warning below.
 
+Reported runs use the frozen protocol with the hyperparameters `prdbench tune` selected
+on root seed 0. The run reads them from the tuning records, after checking each one
+against the config, and records each file's SHA-256; the config itself names none:
+
+```bash
+prdbench tune --config configs/protocol/full.yaml --detector ca_cfar --out results/m3/tune/ca_cfar_root0.json
+prdbench run  --config configs/protocol/full.yaml --tuned results/m3/tune --out results/full/cpu_arms \
+              --detectors ca_cfar os_cfar go_cfar feat_gbdt
+prdbench run  --config configs/protocol/full.yaml --tuned results/m3/tune --out results/full/cnn \
+              --detectors cnn --device cuda
+```
+
+`--detectors` runs a subset of the configured arms. Maps and bootstrap indices depend only
+on the root seed, so arms run separately are still paired.
+
 ## Repository layout
 
 ```

@@ -93,7 +93,7 @@ def test_run_merges_joint_shift_before_dispatch(tmp_path, monkeypatch):
     config.write_text(yaml.safe_dump(spec))
     seen = []
 
-    def capture(merged, out):
+    def capture(merged, out, **kw):
         seen.append((merged, out))
         return {"protocol": {"pfa_points": [1e-3, 1e-2]}, "detectors": []}
 

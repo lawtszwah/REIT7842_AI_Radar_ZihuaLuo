@@ -189,13 +189,38 @@ def _evaluate_split(tgt, bg, snr, thresholds: dict, proto: ProtocolConfig) -> di
     }
 
 
-def run_benchmark(spec: dict, out_dir: Path) -> dict:
-    """Fit on train, calibrate on null maps, and evaluate named test splits."""
+def detector_keys(spec: dict) -> list[str]:
+    return [entry.get("key", entry["kind"]) for entry in spec["detectors"]]
+
+
+def run_benchmark(spec: dict, out_dir: Path, *, tuned: dict[str, dict] | None = None,
+                  only: list[str] | None = None) -> dict:
+    """Fit on train, calibrate on null maps, and evaluate named test splits.
+
+    `only` runs a subset of the configured detectors, in config order; the spec and
+    its hash are unchanged, and maps and bootstrap indices depend only on the root
+    seed, so arms run separately stay paired. `tuned` maps each detector
+    key to `{"params", "source"}` from `tuning.selection.load_selections`; when given,
+    every detector that runs must have an entry, so no arm runs untuned by accident.
+    """
     proto = ProtocolConfig(**spec.get("protocol", {}))
     test_splits = [name for name in TEST_SPLITS if name in spec]
     if "joint_shift_config" in spec and "joint_shift_source" not in spec:
         raise ValueError("joint_shift_config must be merged before run_benchmark")
     _validate_spec(spec, proto, test_splits)
+    keys = detector_keys(spec)
+    if len(set(keys)) != len(keys):
+        raise ValueError("detector keys must be unique")
+    if only is not None:
+        unknown = sorted(set(only) - set(keys))
+        if unknown or not only:
+            raise ValueError(f"unknown detector keys {unknown}; the config has {keys}")
+    entries = [entry for entry, key in zip(spec["detectors"], keys, strict=True)
+               if only is None or key in only]
+    if tuned is not None:
+        missing = [key for key in detector_keys({"detectors": entries}) if key not in tuned]
+        if missing:
+            raise ValueError(f"no tuned hyperparameters for {missing}")
     reporting_split = "test_in_distribution" if "test_in_distribution" in spec else test_splits[0]
     reference_pfa = proto.pfa_points[min(1, len(proto.pfa_points) - 1)]
     out_dir = Path(out_dir)
@@ -212,6 +237,7 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
             "config_sha256": config_sha256(spec),
             "root_seeds": list(range(proto.n_seeds)),
             "reporting_split": reporting_split,
+            "detectors_run": detector_keys({"detectors": entries}),
         },
         "spec": spec,
         "protocol": asdict(proto),
@@ -219,6 +245,10 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
     }
     if "joint_shift_source" in spec:
         results["run"]["joint_shift_source"] = deepcopy(spec["joint_shift_source"])
+    if tuned is not None:
+        results["run"]["tuned"] = {
+            key: deepcopy(tuned[key]) for key in results["run"]["detectors_run"]
+        }
 
     per_seed: dict[str, list[dict]] = {}
     for root in results["run"]["root_seeds"]:
@@ -243,6 +273,12 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
         })
         results["run"].setdefault("simulator", train.meta["simulator"])
         results["run"].setdefault("simulator_version", train.meta["simulator_version"])
+        for key, selected in (results["run"].get("tuned") or {}).items():
+            if selected["source"]["simulator_version"] != train.meta["simulator_version"]:
+                raise ValueError(
+                    f"{key}: tuned on simulator {selected['source']['simulator_version']}, "
+                    f"but this run's data come from {train.meta['simulator_version']}"
+                )
 
         # Spawn all three children even when some splits are absent: positions are fixed.
         children = streams["analysis_bootstrap"].spawn(len(TEST_SPLITS))
@@ -255,8 +291,14 @@ def run_benchmark(spec: dict, out_dir: Path) -> dict:
                 record["materialised_seed"], len(datasets[name].maps), proto.bootstrap_resamples,
             )
 
-        for entry in spec["detectors"]:
+        for entry in entries:
             kind, params = entry["kind"], dict(entry.get("params", {}))
+            if tuned is not None:
+                selected = tuned[entry.get("key", kind)]["params"]
+                clash = {k for k in selected if k in params and params[k] != selected[k]}
+                if clash:
+                    raise ValueError(f"config params {sorted(clash)} contradict the tuned ones")
+                params.update(selected)
             used_streams = map_streams | bootstrap_records
             if REGISTRY[kind].trainable:
                 model_record = stream_record(streams["model_initialization"], model=True)

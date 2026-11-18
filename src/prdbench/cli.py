@@ -10,9 +10,10 @@ from pathlib import Path
 import yaml
 
 from .detectors.cnn import DEVICE_ENV, resolve_device
-from .evaluation.protocol import merge_joint_shift, run_benchmark
+from .evaluation.protocol import detector_keys, merge_joint_shift, run_benchmark
 from .reporting import render
 from .tuning.search import search
+from .tuning.selection import load_selections
 
 
 def _load(path: str) -> dict:
@@ -32,6 +33,13 @@ def main(argv=None) -> int:
     run.add_argument("--out", default="results/latest")
     run.add_argument("--simulator", default=None, choices=["stub", "prdsim"])
     run.add_argument("--device", default=None, help=DEVICE_HELP)
+    run.add_argument("--tuned", default=None, metavar="DIR",
+                     help="directory of `prdbench tune` records (<key>_root0.json); each "
+                          "detector that runs uses its selected hyperparameters, after the "
+                          "record is checked against this config")
+    run.add_argument("--detectors", nargs="+", default=None, metavar="KEY",
+                     help="run only these detector keys, in config order; the config and "
+                          "its hash are unchanged")
 
     tune = sub.add_parser("tune", help="equal-budget hyperparameter search")
     tune.add_argument("--config", required=True)
@@ -55,7 +63,15 @@ def main(argv=None) -> int:
         spec = _load(a.config)
         if a.simulator:
             spec["simulator"] = a.simulator
-        res = run_benchmark(merge_joint_shift(spec), Path(a.out))
+        spec = merge_joint_shift(spec)
+        keys = a.detectors or detector_keys(spec)
+        unknown = sorted(set(keys) - set(detector_keys(spec)))
+        if unknown:
+            raise SystemExit(f"unknown detector keys {unknown}; the config has "
+                             f"{detector_keys(spec)}")
+        # Checked before any data are generated, which can take hours.
+        tuned = load_selections(spec, Path(a.tuned), keys) if a.tuned else None
+        res = run_benchmark(spec, Path(a.out), tuned=tuned, only=a.detectors)
         points = res["protocol"]["pfa_points"]
         reference_pfa = points[min(1, len(points) - 1)]
         for d in res["detectors"]:
