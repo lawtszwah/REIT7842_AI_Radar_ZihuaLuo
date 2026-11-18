@@ -68,7 +68,7 @@ src/prdbench/
                 cfar.py        CA-, OS-, GO-CFAR, tuned under the same budget as the ML models
                 features.py    multi-scale local statistics + gradient-boosted trees
                 cnn.py         small dilated fully-convolutional per-cell detector
-                attention.py   third model family — interface fixed, implementation is M3
+                attention.py   third model family — interface fixed, implementation is M4 (ADR-0005)
   reporting.py  render()       figures + summary table; `prdbench report` and
                                scripts/make_figures.py share this one code path
   evaluation/   metrics.py     Pd per target, Pfa per cell, ROC, SNR stratification
@@ -109,9 +109,9 @@ justified and validated rather than assumed. Until it is (milestone M2):
 | Milestone | Content | Status |
 |---|---|---|
 | M1 | Protocol, metrics, CFAR baselines, development generator, CI | ✅ done — this repo |
-| M2 | Simulator built and validated behind the interface; protocol frozen | in progress |
-| M3 | Feature classifier and CNN tuned at equal budget; attention arm added | scheduled |
-| M4 | Shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | scheduled |
+| M2 | Simulator built and validated behind the interface; protocol frozen | ✅ done — tag `m2-protocol-freeze` |
+| M3 | CFAR, feature classifier and CNN tuned at equal budget under the frozen rule | in progress |
+| M4 | Attention arm added; shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | scheduled |
 | M5 | Final runs at 5 seeds, figures, thesis write-up | scheduled |
 
 The protocol is frozen at the end of M2, **before** the most flexible models are tuned.

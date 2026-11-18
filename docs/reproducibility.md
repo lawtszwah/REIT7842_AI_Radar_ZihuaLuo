@@ -35,8 +35,23 @@ config + seed  ──▶  dataset            (regenerated, never stored)
 ```bash
 git checkout <commit>
 pip install -e ".[dev]"
-./scripts/run_benchmark.sh configs/protocol/full.yaml results/rerun
+# one tuning record per detector, at root seed 0
+prdbench tune --config configs/protocol/full.yaml --detector ca_cfar --out results/m3/tune/ca_cfar_root0.json
+./scripts/run_benchmark.sh configs/protocol/full.yaml results/rerun \
+    --tuned results/m3/tune --detectors ca_cfar os_cfar go_cfar feat_gbdt cnn
 ```
+
+The frozen config fixes `protocol.tuning_budget` and names no hyperparameters, so `run`
+refuses it without `--tuned`: a reported run takes its hyperparameters only from
+`prdbench tune`, never from constructor defaults. Each record is checked before any data
+are generated (`tuning/selection.py`). It must carry the run's config hash, root seed 0,
+the frozen budget and selection Pfa, and a clean commit (`git_dirty: false`). Every trial
+must lie in the frozen search space, and a space no larger than the budget must appear
+exactly once per configuration. Its `best` must be the trial the selection rule picks, and
+a learned arm's seed must be root 0's model seed. Each record's path, SHA-256, commit,
+device and validation Pd are written to `results.json` under `run.tuned`, beside the
+unchanged config hash. `--detectors` runs a subset of the arms; maps and bootstrap indices
+depend only on the root seed, so arms run separately, on different machines, stay paired.
 
 ## What would make a result non-reproducible, and the control for it
 

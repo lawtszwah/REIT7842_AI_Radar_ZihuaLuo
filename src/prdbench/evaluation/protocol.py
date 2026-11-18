@@ -217,6 +217,11 @@ def run_benchmark(spec: dict, out_dir: Path, *, tuned: dict[str, dict] | None = 
             raise ValueError(f"unknown detector keys {unknown}; the config has {keys}")
     entries = [entry for entry, key in zip(spec["detectors"], keys, strict=True)
                if only is None or key in only]
+    if tuned is None and proto.tuning_budget is not None:
+        # A frozen config names no hyperparameters; running it untuned would report
+        # constructor defaults as if they were selected (ADR-0005).
+        raise ValueError("this config fixes protocol.tuning_budget, so it runs only with "
+                         "the tuning records (prdbench run --tuned)")
     if tuned is not None:
         missing = [key for key in detector_keys({"detectors": entries}) if key not in tuned]
         if missing:

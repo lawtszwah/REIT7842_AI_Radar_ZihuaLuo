@@ -1,10 +1,10 @@
 """Attention-based detector -- the third model family in the research question.
 
-STATUS: interface fixed, implementation scheduled for Milestone M3
-(see README, Plan of work).  Implementing it after the CFAR and CNN arms are
-locked keeps the evaluation protocol frozen before the most flexible model is
-introduced, which is the failure mode the project is criticising in the
-literature.
+STATUS: interface fixed, implementation scheduled for Milestone M4
+(ADR-0005, "What is not frozen"; README, Plan of work).  Implementing it
+after the CFAR and CNN arms are locked keeps the evaluation protocol frozen
+before the most flexible model is introduced, which is the failure mode the
+project is criticising in the literature.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ class PatchAttention(Detector):
         self.name = f"Attn(p={patch},d={dim},L={layers})"
 
     def fit(self, maps, labels, **kw):  # pragma: no cover
-        raise NotImplementedError("Milestone M3; see README plan of work.")
+        raise NotImplementedError("Milestone M4; see ADR-0005.")
 
     def score(self, maps):  # pragma: no cover
-        raise NotImplementedError("Milestone M3; see README plan of work.")
+        raise NotImplementedError("Milestone M4; see ADR-0005.")

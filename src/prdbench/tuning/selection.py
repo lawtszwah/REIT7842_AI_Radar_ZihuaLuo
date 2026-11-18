@@ -88,6 +88,16 @@ def load_selections(spec: dict, directory: Path, keys: list[str]) -> dict[str, d
               f"selects parameters {sorted(params)}, not {sorted(space)}")
         for name, value in params.items():
             check(value in space[name], f"selects {name}={value!r}, outside {space[name]}")
+        # Every trial, not only the best, must come from the frozen space; when the budget
+        # covers the space, the record must hold each configuration exactly once.
+        tried = [{k: v for k, v in trial["params"].items() if k != "seed"} for trial in trials]
+        for t in tried:
+            check(set(t) == set(space) and all(t[k] in space[k] for k in space),
+                  f"holds a trial {t} outside the frozen search space")
+        if len(grid(space)) <= budget:
+            canonical = sorted(json.dumps(t, sort_keys=True) for t in tried)
+            check(canonical == sorted(json.dumps(t, sort_keys=True) for t in grid(space)),
+                  "does not hold every configuration of the search space exactly once")
 
         selections[key] = {
             "params": params,

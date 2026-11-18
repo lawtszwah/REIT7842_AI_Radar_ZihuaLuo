@@ -154,6 +154,33 @@ def test_records_the_frozen_protocol_could_not_have_made_are_refused(
         load_selections(_tuned_spec(), directory, [key])
 
 
+def _swap_first_trial(r):
+    r["all"][0]["params"] = dict(r["all"][1]["params"])
+
+
+def _move_unselected_trial_outside(r):
+    other = next(t for t in r["all"] if t is not r["best"] and t != r["best"])
+    other["params"]["train"] = 99
+
+
+@pytest.mark.parametrize("edit, message", [
+    (_move_unselected_trial_outside, "trial .* outside the frozen search space"),
+    (_swap_first_trial, "every configuration of the search space exactly once"),
+])
+def test_every_trial_must_come_from_the_frozen_space(records, tmp_path, edit, message):
+    def guarded(r):
+        edit(r)
+        r["best"] = max(r["all"], key=lambda t: t["pd"])  # keep the best check satisfied
+    directory = _edited(records, tmp_path, "ca_cfar", guarded)
+    with pytest.raises(ValueError, match=message):
+        load_selections(_tuned_spec(), directory, ["ca_cfar"])
+
+
+def test_a_frozen_config_does_not_run_untuned(tmp_path):
+    with pytest.raises(ValueError, match="runs only with the tuning records"):
+        run_benchmark(_tuned_spec(), tmp_path)
+
+
 def test_a_missing_record_is_refused(tmp_path):
     with pytest.raises(ValueError, match="no tuning record"):
         load_selections(_tuned_spec(), tmp_path, ["ca_cfar"])
