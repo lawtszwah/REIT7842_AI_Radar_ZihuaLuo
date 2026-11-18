@@ -1,9 +1,9 @@
 # ADR-0005 — The evaluation protocol is frozen at M2
 
-**Status:** proposed; every open decision is now taken (see "Decisions taken before
-acceptance"), and the ADR is accepted once the freeze run at the tagged version is recorded ·
-**Date:** 2026-10-11, revised 2026-10-12 for the group's generator and 2026-11-17 to record
-the decisions · **Builds on:** ADR-0001, ADR-0003, ADR-0006
+**Status:** accepted 2026-11-18, after the freeze run (see "Recorded at freeze") ·
+**Date:** 2026-10-11, revised 2026-10-12 for the group's generator, 2026-11-17 to record
+the decisions and 2026-11-18 to record the freeze run · **Builds on:** ADR-0001, ADR-0003,
+ADR-0006
 
 ## Context
 
@@ -32,8 +32,9 @@ Three things had to be true first, and now are:
    (2026-10-12 and 2026-10-13): all 35 split × root rows meet the 10⁷-cell floor, no
    target is lost to the zero-Doppler mask, and the calibration split regenerates
    bit-identically at every root. The tightest margin is the validation split at root 4,
-   10,483,464 eligible cells, about 4.8% above the floor. Details are in
-   `docs/validation_report.md`.
+   10,483,464 eligible cells, about 4.8% above the floor. The freeze run repeated the check
+   at adapter 1.0.0 and reproduced every split bit for bit ("Recorded at freeze"). Details
+   are in `docs/validation_report.md`.
 
 ## Decision
 
@@ -101,11 +102,26 @@ measurements are in `docs/data_grid.md`. The grids live in `configs/protocol/ful
 
 | Item | Value |
 |---|---|
-| Merged config SHA-256 (`full.yaml` + joint shift) | *at tag* |
-| `shift_test.yaml` SHA-256 | *at tag* |
-| Generator fingerprint | *at tag* (currently `567f5e55df8a…`) |
-| Simulator version | *at tag* |
-| Commit | *at tag* |
+| Merged config SHA-256 (`full.yaml` + joint shift) | `decdc6d1259f65db8a9dd1899c4808e2c72da73f9f6e2b1b6e3711ab7017c62f` |
+| `shift_test.yaml` SHA-256 | `8d6448866f2f1ab77454b0d5e7e6973b548d51725c7fc436a9735ffacada9eaf` |
+| `full.yaml` SHA-256 (file bytes) | `930933cce4faa3c896df6779b23882ab8ec4cfefd4f5fa0d64ac47d778d638d6` |
+| Generator fingerprint | `567f5e55df8a0c99a1a08f663de242f8cbc51315a049108c720d8707e26de4b4` |
+| Simulator version | `groupgen` `1.0.0+gen.567f5e55df8a`; `prdsim` `1.0.0` |
+| Commit | Freeze run at `d8a0878`, Python 3.11.16; the tag `m2-protocol-freeze` marks the commit that records this table, which changes only documentation |
+
+The freeze run (2026-11-17 21:01 to 2026-11-18 09:05, macOS, MATLAB R2024a):
+
+- `pytest -m matlab`: 3 passed (output contract, truth calibration, seed determinism).
+- `scripts/check_splits.py`, root seeds 0–4: all 35 split × root rows meet the 10⁷ floor, no
+  target is excluded by the zero-Doppler mask, and the calibration split regenerates
+  bit-identically at every root.
+- The version bump changed every cache key, so all 7,900 scenes were generated afresh.
+  For all 35 rows, `maps_sha256`, the materialised seed, the eligible-cell count and the
+  target counts equal the October run's (245 of 245 fields). Every split at every root
+  is therefore reproduced bit for bit from its seed, not only the calibration split.
+
+Record: `results/validation/split_check_groupgen_freeze.{json,log}` and
+`freeze_matlab_tests.log`, summarised in `docs/validation_report.md`.
 
 ## What is not frozen
 
@@ -196,15 +212,13 @@ with the reason recorded here.
 10. **Versions at the tag: 1.0.0** for the `groupgen` adapter and for `prdsim`, to mark the
     frozen models. Bumping changes no generated data but changes `meta`.
 
-### Remaining before the tag
+### Steps before the tag (done)
 
-- Bump the adapter and `prdsim` to 1.0.0.
-- At the tagged commit, under Python 3.11: run `pytest -m matlab` (truth calibration) and
-  `scripts/check_splits.py` at root seeds 0–4. The budget and the joint-shift comment
-  changed after the October split check, so both config hashes have changed and the
-  check must be repeated in any case.
-- Fill the "Recorded at freeze" table, set this ADR to **accepted**, and tag
-  `m2-protocol-freeze` once CI passes.
+- The adapter and `prdsim` were bumped to 1.0.0.
+- Under Python 3.11, `pytest -m matlab` and `scripts/check_splits.py` at root seeds 0–4
+  were re-run (the budget and the joint-shift comment had changed both config hashes).
+- The "Recorded at freeze" table is filled and this ADR is accepted. The tag
+  `m2-protocol-freeze` is set once CI passes.
 
 ## Consequences
 

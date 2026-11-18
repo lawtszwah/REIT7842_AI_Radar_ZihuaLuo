@@ -1,14 +1,16 @@
 # Validation report: the group's generator and the protocol splits
 
-**Status:** pre-freeze record · **Date:** 2026-11-17 · **Generator:** `groupgen`
-`0.1.0+gen.567f5e55df8a` · **Builds on:** ADR-0005, ADR-0006, `docs/data_grid.md`
+**Status:** freeze record · **Date:** 2026-11-18 · **Generator:** `groupgen`
+`1.0.0+gen.567f5e55df8a` (Gates 1–3 measured at `0.1.0`, same generator files) ·
+**Builds on:** ADR-0005, ADR-0006, `docs/data_grid.md`
 
 `results/` is not under version control, so this file holds the numbers the protocol freeze
 relies on. The raw records are `results/validation/groupgen_gates.json` (written by
-`scripts/validate_groupgen.py`) and `results/validation/split_check_groupgen_root0.json` and
-`..._roots1-4.json` (written by `scripts/check_splits.py`). Both are re-run at the tagged
-version before the freeze (ADR-0005, "Remaining before the tag"), and this report is
-updated with that run.
+`scripts/validate_groupgen.py`), `results/validation/split_check_groupgen_root0.json` and
+`..._roots1-4.json` (the October split check), and
+`results/validation/split_check_groupgen_freeze.json` and `freeze_matlab_tests.log` (the
+freeze run, Section 4). The adapter bump from 0.1.0 to 1.0.0 changed no generator file, and
+Section 4 shows it changed no generated map, so the Gate 1–3 numbers stand for 1.0.0.
 
 No detector other than CA-CFAR at a fixed design point is run here. Nothing below is a
 benchmark result.
@@ -77,8 +79,12 @@ property the baseline needs.
 
 ## 4. Split check at all five root seeds
 
-`scripts/check_splits.py` on the generator, root seeds 0 (2026-10-12) and 1–4 (finished
-2026-10-13), all under one config hash (`98445044…adae5`, joint shift `60b4c0e8…d6eb`).
+`scripts/check_splits.py` on the generator, first at root seeds 0 (2026-10-12) and 1–4
+(finished 2026-10-13), under config hash `98445044…adae5` (joint shift `60b4c0e8…d6eb`), then
+again as the freeze run (2026-11-17 21:01 to 2026-11-18 09:05, adapter 1.0.0, Python 3.11,
+commit `d8a0878`) under the frozen config hash `decdc6d1…c62f` (joint shift
+`8d644886…9eaf`). The two config hashes differ only by the tuning budget and a comment;
+neither affects the data. The table holds the freeze run's values, which equal October's.
 
 | Split | Maps | Eligible background cells, min over roots | Ratio to the 10⁷ floor | Tightest root |
 |---|---:|---:|---:|---:|
@@ -91,12 +97,18 @@ property the baseline needs.
 | Grid shift | 1000 | 23,048,120 | 2.305 | 2 |
 
 **Verdict: passes.** All 35 split × root rows meet the floor. No target is excluded by the
-zero-Doppler mask in any split. The calibration split was regenerated and is bit-identical
-at every root seed; the other six splits were not regenerated (the script's default). Their
-reproducibility rests on the cache being keyed by each scene's full specification and on the
-separate check (2026-10-12) that MATLAB returns bit-identical signals for a given seed.
+zero-Doppler mask in any split. The calibration split regenerates bit-identically at every
+root seed.
 
-Generation took 2.31–2.55 hours per root seed, 12.1 hours for all five.
+**Reproducibility of every split.** The adapter version is part of every cache key, so the
+freeze run could use none of the October cache and generated all 7,900 scenes afresh. For
+all 35 rows, the SHA-256 of the maps, the materialised seed, the eligible-cell count and the
+three target counts equal the October values: 245 of 245 fields, no difference. Every split
+at every root seed is thus reproduced bit for bit from its recorded seed, five weeks apart.
+The truth-calibration tests (`pytest -m matlab`) passed in the same run, 3 of 3.
+
+Generation took 2.31–2.55 hours per root seed in October, 12.1 hours for all five; the
+freeze run took 2.31–2.54 hours per root seed, about 12 hours in all.
 
 ## 5. The reference simulator
 
