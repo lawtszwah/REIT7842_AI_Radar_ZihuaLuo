@@ -13,9 +13,11 @@ from prdbench.reporting import render
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--results", required=True)
+    ap.add_argument("--results", required=True, nargs="+")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
-    out = Path(a.out) if a.out else Path(a.results).parent / "figures"
-    for f in render(Path(a.results), out):
+    if a.out is None and len(a.results) > 1:
+        ap.error("--out is required when reporting more than one results file")
+    out = Path(a.out) if a.out else Path(a.results[0]).parent / "figures"
+    for f in render([Path(r) for r in a.results], out):
         print(f)

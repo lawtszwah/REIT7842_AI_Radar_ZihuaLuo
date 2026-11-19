@@ -1,0 +1,11 @@
+{
+  "params": {
+    "train": 8,
+    "guard": 3,
+    "rank_pct": 87.5
+  },
+  "pd": 0.39,
+  "threshold": 3.3697845935821533,
+  "n_targets": 1400,
+  "n_background_cells": 10483962
+}

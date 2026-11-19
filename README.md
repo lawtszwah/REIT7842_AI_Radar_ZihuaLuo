@@ -54,7 +54,15 @@ prdbench run  --config configs/protocol/full.yaml --tuned results/m3/tune --out 
 ```
 
 `--detectors` runs a subset of the configured arms. Maps and bootstrap indices depend only
-on the root seed, so arms run separately are still paired.
+on the root seed, so arms run separately are still paired. `prdbench report` takes their
+results files together, checks that they are one experiment on paired data, and reports
+the headline Pfa 1e-4 beside the selection Pfa 1e-3, with every root seed, achieved Pfa,
+each shift split, and GPU latency kept apart from CPU latency:
+
+```bash
+prdbench report --results results/full/cnn/results.json results/full/cpu_arms/results.json \
+                --out results/full/figures
+```
 
 ## Repository layout
 
@@ -109,9 +117,9 @@ justified and validated rather than assumed. Until it is (milestone M2):
 | Milestone | Content | Status |
 |---|---|---|
 | M1 | Protocol, metrics, CFAR baselines, development generator, CI | ✅ done — this repo |
-| M2 | Simulator built and validated behind the interface; protocol frozen | ✅ done — tag `m2-protocol-freeze` |
-| M3 | CFAR, feature classifier and CNN tuned at equal budget under the frozen rule | in progress |
-| M4 | Attention arm added; shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | scheduled |
+| M2 | Simulator built and validated behind the interface; protocol frozen | ✅ done — tag `m2-protocol-freeze` (ADR-0005, ADR-0006) |
+| M3 | CFAR arms, feature classifier and CNN tuned at equal budget, run at 5 root seeds | ✅ done — `experiments/m3-formal/` |
+| M4 | Attention arm (ADR-0005); shift tests (unseen SNR / noise / clutter regimes), cost-constrained sweep | next — shift-split results for the five M3 arms are already in `experiments/m3-formal/` |
 | M5 | Final runs at 5 seeds, figures, thesis write-up | scheduled |
 
 The protocol is frozen at the end of M2, **before** the most flexible models are tuned.

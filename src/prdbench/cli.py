@@ -51,8 +51,11 @@ def main(argv=None) -> int:
     tune.add_argument("--device", default=None, help=DEVICE_HELP)
 
     fig = sub.add_parser("report", help="render figures and tables from results.json")
-    fig.add_argument("--results", required=True)
-    fig.add_argument("--out", default=None)
+    fig.add_argument("--results", required=True, nargs="+", metavar="RESULTS_JSON",
+                     help="one or more results files of one experiment, e.g. arms run "
+                          "separately with --detectors")
+    fig.add_argument("--out", default=None,
+                     help="output directory; required with more than one results file")
 
     a = ap.parse_args(argv)
     if getattr(a, "device", None):
@@ -76,7 +79,7 @@ def main(argv=None) -> int:
         reference_pfa = points[min(1, len(points) - 1)]
         for d in res["detectors"]:
             pd = d[f"pd@pfa={reference_pfa:g}"]
-            print(f"{d['key']:<14} Pd[{res['run']['reporting_split']}]="
+            print(f"{d['key']:<14} Pd@{reference_pfa:g}[{res['run']['reporting_split']}]="
                   f"{pd['mean']:.3f}+-{pd['std']:.3f}  "
                   f"{d['latency_s_per_map']['mean']*1e3:7.2f} ms/map  "
                   f"params={d['n_parameters']}")
@@ -92,8 +95,10 @@ def main(argv=None) -> int:
         return 0
 
     if a.cmd == "report":
-        results = Path(a.results)
-        out = Path(a.out) if a.out else results.parent / "figures"
+        results = [Path(r) for r in a.results]
+        if a.out is None and len(results) > 1:
+            raise SystemExit("--out is required when reporting more than one results file")
+        out = Path(a.out) if a.out else results[0].parent / "figures"
         for f in render(results, out):
             print(f)
         return 0

@@ -1,0 +1,10 @@
+{
+  "params": {
+    "train": 12,
+    "guard": 2
+  },
+  "pd": 0.33285714285714285,
+  "threshold": 7.251646518707275,
+  "n_targets": 1400,
+  "n_background_cells": 10483962
+}

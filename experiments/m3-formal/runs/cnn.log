@@ -1,0 +1,3 @@
+cnn            Pd[test_in_distribution]=0.246+-0.123     0.26 ms/map  params=1905
+
+wrote results\full\cnn\results.json

@@ -9,37 +9,15 @@ import json
 
 import pytest
 import yaml
+from test_reporting import arm, results
 
 from prdbench import cli
 from prdbench.cli import main
 
 
 def _results_fixture() -> dict:
-    """The smallest results.json the reporting code accepts."""
-    pfa = [1e-4, 1e-3, 1e-2]
-    roc = {"pfa": [1e-3, 1e-2], "pd": [0.4, 0.7]}
-    snr = [{"snr_lo": 0.0, "snr_hi": 8.0, "n": 10, "pd": 0.5}]
-
-    def arm(key, family, params):
-        run = {"key": key, "seed": 0, "roc": roc, "pd_by_snr": snr}
-        rec = {
-            "key": key,
-            "describe": {"name": key, "family": family, "trainable": False,
-                         "n_parameters": params, "params": {}},
-            "seeds": 1,
-            "latency_s_per_map": {"mean": 0.001, "std": 0.0},
-            "n_parameters": params,
-            "runs": [run],
-        }
-        for p in pfa:
-            rec[f"pd@pfa={p:g}"] = {"mean": 0.5, "std": 0.01}
-        return rec
-
-    return {
-        "run": {"git_commit": "0" * 40},
-        "protocol": {"pfa_points": pfa},
-        "detectors": [arm("ca_cfar", "cfar", 0), arm("cnn", "deep", 1234)],
-    }
+    """A small results.json of the shape `prdbench run` writes."""
+    return results(arm("ca_cfar", "cfar", [0.5, 0.5]), arm("cnn", "deep", [0.5, 0.4]))
 
 
 def test_report_renders_every_figure(tmp_path):
@@ -49,7 +27,8 @@ def test_report_renders_every_figure(tmp_path):
     assert main(["report", "--results", str(results)]) == 0
 
     figures = tmp_path / "figures"
-    for name in ("roc.png", "pd_by_snr.png", "pd_vs_cost.png", "summary.json"):
+    for name in ("pd_by_root.png", "roc.png", "pd_by_snr.png", "pd_vs_cost.png",
+                 "summary.json", "summary.md"):
         assert (figures / name).exists(), f"{name} was not produced"
 
 
@@ -60,6 +39,22 @@ def test_report_honours_explicit_out_dir(tmp_path):
 
     assert main(["report", "--results", str(results), "--out", str(out)]) == 0
     assert (out / "roc.png").exists()
+
+
+def test_report_merges_several_results_files(tmp_path):
+    gpu, cpu = tmp_path / "gpu.json", tmp_path / "cpu.json"
+    gpu.write_text(json.dumps(results(arm("cnn", "deep", [0.5, 0.4], device="cuda"))))
+    cpu.write_text(json.dumps(results(arm("ca_cfar", "cfar", [0.5, 0.5]))))
+    out = tmp_path / "merged"
+
+    assert main(["report", "--results", str(gpu), str(cpu), "--out", str(out)]) == 0
+    assert "| cnn | 99 | CUDA |" in (out / "summary.md").read_text(encoding="utf-8")
+
+
+def test_report_of_several_files_needs_an_out_dir(tmp_path):
+    a, b = tmp_path / "a.json", tmp_path / "b.json"
+    with pytest.raises(SystemExit, match="--out"):
+        main(["report", "--results", str(a), str(b)])
 
 
 @pytest.mark.parametrize("cmd", ["run", "tune", "report"])

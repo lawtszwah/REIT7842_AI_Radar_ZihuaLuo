@@ -1,0 +1,12 @@
+{
+  "params": {
+    "width": 8,
+    "depth": 4,
+    "lr": 0.003,
+    "seed": 23012616
+  },
+  "pd": 0.42642857142857143,
+  "threshold": 1.418033242225647,
+  "n_targets": 1400,
+  "n_background_cells": 10483962
+}

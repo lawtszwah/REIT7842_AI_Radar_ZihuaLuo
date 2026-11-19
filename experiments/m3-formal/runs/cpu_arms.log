@@ -1,0 +1,6 @@
+ca_cfar        Pd[test_in_distribution]=0.284+-0.006     0.33 ms/map  params=0
+os_cfar        Pd[test_in_distribution]=0.291+-0.006    40.14 ms/map  params=0
+go_cfar        Pd[test_in_distribution]=0.226+-0.008     0.32 ms/map  params=0
+feat_gbdt      Pd[test_in_distribution]=0.307+-0.011     9.76 ms/map  params=4924
+
+wrote results\full\cpu_arms\results.json

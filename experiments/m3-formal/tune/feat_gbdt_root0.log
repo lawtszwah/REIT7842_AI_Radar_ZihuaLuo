@@ -1,0 +1,12 @@
+{
+  "params": {
+    "max_iter": 160,
+    "learning_rate": 0.05,
+    "max_depth": 4,
+    "seed": 23012616
+  },
+  "pd": 0.43642857142857144,
+  "threshold": 0.2210373431444168,
+  "n_targets": 1400,
+  "n_background_cells": 10483962
+}
